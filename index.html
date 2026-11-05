@@ -185,15 +185,6 @@
             </div>
         </div>
 
-        <button onclick="prevSlide()" id="prevArrow" 
-            class="fixed left-6 top-1/2 -translate-y-1/2 z-40 w-12 h-12 bg-[#FFD166] text-[#2C3E50] doodle-btn rounded-full flex items-center justify-center text-xl font-extrabold opacity-40 pointer-events-none">
-            ←
-        </button>
-        <button onclick="nextSlide()" id="nextArrow" 
-            class="fixed right-6 top-1/2 -translate-y-1/2 z-40 w-12 h-12 bg-[#FFD166] text-[#2C3E50] doodle-btn rounded-full flex items-center justify-center text-xl font-extrabold">
-            →
-        </button>
-
         <!-- HORIZONTAL SLIDES WRAPPER -->
         <div class="flex-grow overflow-hidden relative">
             <div id="sliderWrapper" class="slider-wrapper">
@@ -207,7 +198,7 @@
                                     <h2 class="font-sniglet text-3xl font-extrabold text-[#1D3557]">
                                         📌 SLIDE 1: CREATE NEW TASK
                                     </h2>
-                                    <p class="font-heading text-sm text-gray-600">Enter task details to store in SQLite DB & trigger background alarms.</p>
+                                    <p class="font-heading text-sm text-gray-600">Enter task details to store in SQLite DB & trigger alarms.</p>
                                 </div>
                                 <span class="bg-[#FF6B6B] text-white font-heading font-bold text-xs px-3 py-1 rounded-full border-2 border-[#2C3E50]">
                                     Input Dock
@@ -277,8 +268,8 @@
                                     <div>
                                         <h3 class="font-heading font-bold text-lg text-[#1D3557] mb-2">🧸 Priority Rulebook:</h3>
                                         <ul class="font-heading text-xs space-y-1.5 text-gray-700">
-                                            <li>• 🔥 <strong>High:</strong> Infinite sound loop + center screen modal + notification bar.</li>
-                                            <li>• ⚡ <strong>Medium:</strong> 3 audio beeps + center screen modal + notification bar.</li>
+                                            <li>• 🔥 <strong>High:</strong> Repeating beep loop + center modal + notification bar.</li>
+                                            <li>• ⚡ <strong>Medium:</strong> 3 audio beeps + center modal + notification bar.</li>
                                             <li>• 🌱 <strong>Low:</strong> Vibration only + notification bar.</li>
                                         </ul>
                                     </div>
@@ -292,7 +283,7 @@
                         </div>
 
                         <div class="flex justify-between items-center text-xs font-heading text-gray-500 border-t-2 border-dashed border-[#2C3E50] pt-2 mt-4">
-                            <span>Tip: Press <strong>Right Arrow (→)</strong> on your keyboard to switch slides</span>
+                            <span>Use the top navigation tabs to switch between views</span>
                             <span>Slide 1 of 3</span>
                         </div>
                     </div>
@@ -340,7 +331,7 @@
                         </div>
 
                         <div class="flex justify-between items-center text-xs font-heading text-gray-500 border-t-2 border-dashed border-[#2C3E50] pt-2 mt-2 shrink-0">
-                            <span>Use <strong>← Left</strong> or <strong>Right →</strong> keys to navigate slides</span>
+                            <span>Use the top navigation tabs to switch between views</span>
                             <span>Slide 2 of 3</span>
                         </div>
                     </div>
@@ -402,7 +393,7 @@
                         </div>
 
                         <div class="flex justify-between items-center text-xs font-heading text-gray-500 border-t-2 border-dashed border-[#2C3E50] pt-2 mt-4">
-                            <span>Press <strong>← Left Arrow</strong> to return to Slide 2</span>
+                            <span>Use the top navigation tabs to switch between views</span>
                             <span>Slide 3 of 3</span>
                         </div>
                     </div>
@@ -549,7 +540,6 @@
 
             let notificationBody = "Your task is due now!";
 
-            // Priority Sound Handling
             if (task.priority === 'High') {
                 playNonStopAlarmSound();
                 notificationBody = "🔥 HIGH PRIORITY: Task due right now!";
@@ -560,7 +550,6 @@
                 notificationBody = "🌱 Low Priority: Task notification (vibration only).";
             }
 
-            // Push Notification to Service Worker for Phone Notification Bar & Center Screen Heads-Up
             if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
                     action: 'TRIGGER_ALARM',
@@ -570,7 +559,6 @@
                 });
             }
 
-            // Force Window Focus & Center Screen Modal Popup
             window.focus();
             if (task.priority !== 'Low') {
                 const modal = document.getElementById('alarmModal');
@@ -592,21 +580,20 @@
                 const playBurst = () => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
-                    osc.type = 'square';
-                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.2);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
                     
-                    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
                     
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
                     osc.start();
-                    osc.stop(audioCtx.currentTime + 0.2);
+                    osc.stop(audioCtx.currentTime + 0.3);
                 };
 
                 playBurst();
-                alarmInterval = setInterval(playBurst, 400);
+                alarmInterval = setInterval(playBurst, 1000);
             } catch (e) {
                 console.log("Audio play error:", e);
             }
@@ -870,21 +857,10 @@
                     tab.className = 'px-3 py-1 font-heading font-bold text-xs rounded-full transition-all text-[#2C3E50] hover:bg-yellow-200';
                 }
             }
-
-            document.getElementById('prevArrow').style.opacity = currentSlide === 0 ? '0.4' : '1';
-            document.getElementById('prevArrow').style.pointerEvents = currentSlide === 0 ? 'none' : 'auto';
-            document.getElementById('nextArrow').style.opacity = currentSlide === totalSlides - 1 ? '0.4' : '1';
-            document.getElementById('nextArrow').style.pointerEvents = currentSlide === totalSlides - 1 ? 'none' : 'auto';
         }
 
         function nextSlide() { if (currentSlide < totalSlides - 1) goToSlide(currentSlide + 1); }
         function prevSlide() { if (currentSlide > 0) goToSlide(currentSlide - 1); }
-
-        document.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-            if (e.key === 'ArrowRight') nextSlide();
-            if (e.key === 'ArrowLeft') prevSlide();
-        });
     </script>
 </body>
 </html>
