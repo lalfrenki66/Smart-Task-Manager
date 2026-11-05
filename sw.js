@@ -1,4 +1,4 @@
-// sw.js - Service Worker for Heads-Up Center Screen & Notification Bar Banners
+// sw.js - Service Worker for Heads-Up Center Screen Popups
 self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
@@ -22,7 +22,7 @@ self.addEventListener('message', (event) => {
         } else if (priority === 'Medium') {
             vibratePattern = [200, 100, 200];
             requireInteractionSetting = true;
-        } else if (priority === 'Low') {
+        } else {
             vibratePattern = [150];
             requireInteractionSetting = false;
         }
@@ -35,6 +35,8 @@ self.addEventListener('message', (event) => {
             tag: 'task-alarm-' + Date.now(),
             requireInteraction: requireInteractionSetting,
             renotify: true,
+            priority: 'high', // Forces high notification priority
+            visibility: 'public', // Makes it visible on locked screens
             actions: [
                 { action: 'open', title: '📂 Open App' },
                 { action: 'dismiss', title: '❌ Dismiss' }
