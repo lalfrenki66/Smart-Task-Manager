@@ -277,9 +277,9 @@
                                     <div>
                                         <h3 class="font-heading font-bold text-lg text-[#1D3557] mb-2">🧸 Priority Rulebook:</h3>
                                         <ul class="font-heading text-xs space-y-1.5 text-gray-700">
-                                            <li>• 🔥 <strong>High:</strong> Infinite sound loop + status bar notification.</li>
-                                            <li>• ⚡ <strong>Medium:</strong> 3 audio beeps + status bar notification.</li>
-                                            <li>• 🌱 <strong>Low:</strong> Vibration only + status bar notification.</li>
+                                            <li>• 🔥 <strong>High:</strong> Infinite sound loop + center screen modal + notification bar.</li>
+                                            <li>• ⚡ <strong>Medium:</strong> 3 audio beeps + center screen modal + notification bar.</li>
+                                            <li>• 🌱 <strong>Low:</strong> Vibration only + notification bar.</li>
                                         </ul>
                                     </div>
 
@@ -417,7 +417,7 @@
         </div>
     </div>
 
-    <!-- CARTOON ALARM WARNING MODAL -->
+    <!-- CARTOON ALARM WARNING MODAL (CENTER POPUP) -->
     <div id="alarmModal" 
         class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none transition-all duration-300">
         <div class="bg-[#FFFDF0] doodle-box max-w-md w-full p-6 text-center ring-alarm shadow-2xl relative">
@@ -517,7 +517,7 @@
                     silentAudio.play().catch(e => console.log("Audio lock error:", e));
                 }
 
-                alert("Background Engine Activated! Alarms will push to your status bar.");
+                alert("Background Engine Activated! Alarms will push to your status bar and center screen.");
                 appendLog("Background Engine LOCKED & ACTIVE");
             } catch (e) {
                 alert("Tap anywhere on the screen first to enable permissions.");
@@ -557,10 +557,10 @@
                 playMediumBeeps();
                 notificationBody = "⚡ Medium Priority: Task reminder due.";
             } else {
-                notificationBody = "🌱 Low Priority: Task notification.";
+                notificationBody = "🌱 Low Priority: Task notification (vibration only).";
             }
 
-            // Push Notification to Service Worker for Phone Notification Bar
+            // Push Notification to Service Worker for Phone Notification Bar & Center Screen Heads-Up
             if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
                     action: 'TRIGGER_ALARM',
@@ -568,19 +568,15 @@
                     title: `⚠️ ALARM (${task.priority}): ${task.title}`,
                     body: notificationBody
                 });
-            } else if ("Notification" in window && Notification.permission === "granted") {
-                new Notification(`⚠️ ALARM: ${task.title}`, {
-                    body: notificationBody,
-                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23FFD166'/%3E%3C/svg%3E",
-                    requireInteraction: task.priority === 'High'
-                });
             }
 
-            // Show In-App Modal (for High and Medium)
+            // Force Window Focus & Center Screen Modal Popup
+            window.focus();
             if (task.priority !== 'Low') {
+                const modal = document.getElementById('alarmModal');
+                modal.classList.remove('opacity-0', 'pointer-events-none');
                 document.getElementById('alarmModalTitle').innerText = task.title;
                 document.getElementById('alarmModalTime').innerText = `⏰ Priority: ${task.priority} | Due at ${format12Hour(task.dueTime)}`;
-                document.getElementById('alarmModal').classList.remove('opacity-0', 'pointer-events-none');
             }
 
             appendLog(`ALARM (${task.priority}): "${task.title}" triggered.`);
