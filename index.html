@@ -152,7 +152,7 @@
     <!-- FULLSCREEN DESKTOP APPLICATION SHELL -->
     <div class="w-full h-full bg-[#FFF9E6] doodle-box flex flex-col overflow-hidden relative">
         
-        <!-- TOP DESKTOP WINDOW BAR & HORIZONTAL SLIDE NAV TABS -->
+        <!-- TOP WINDOW BAR & NAV TABS -->
         <div class="bg-[#FFD166] border-b-4 border-[#2C3E50] p-2 px-4 flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0 z-30">
             <div class="flex items-center space-x-2">
                 <div class="win-dot bg-[#FF6B6B]"></div>
@@ -198,7 +198,7 @@
         <div class="flex-grow overflow-hidden relative">
             <div id="sliderWrapper" class="slider-wrapper">
                 
-                <!-- SLIDE 1: CREATE & PLAN WORKSPACE -->
+                <!-- SLIDE 1: CREATE & PLAN -->
                 <div class="slide-page flex items-center justify-center">
                     <div class="w-full max-w-4xl h-full bg-[#FFFDF0] doodle-box p-5 flex flex-col justify-between overflow-y-auto">
                         <div>
@@ -252,18 +252,12 @@
 
                                     <div class="grid grid-cols-2 gap-3">
                                         <div>
-                                            <label class="font-heading block text-base font-bold text-[#2C3E50] mb-1">
-                                                📅 Due Date
-                                            </label>
-                                            <input type="date" id="dueDate" required
-                                                class="w-full p-2.5 bg-white doodle-input text-base text-[#2C3E50]" />
+                                            <label class="font-heading block text-base font-bold text-[#2C3E50] mb-1">📅 Due Date</label>
+                                            <input type="date" id="dueDate" required class="w-full p-2.5 bg-white doodle-input text-base text-[#2C3E50]" />
                                         </div>
                                         <div>
-                                            <label class="font-heading block text-base font-bold text-[#2C3E50] mb-1">
-                                                ⏰ Alarm Time
-                                            </label>
-                                            <input type="time" id="dueTime" required
-                                                class="w-full p-2.5 bg-white doodle-input text-base text-[#2C3E50]" />
+                                            <label class="font-heading block text-base font-bold text-[#2C3E50] mb-1">⏰ Alarm Time</label>
+                                            <input type="time" id="dueTime" required class="w-full p-2.5 bg-white doodle-input text-base text-[#2C3E50]" />
                                         </div>
                                     </div>
 
@@ -272,7 +266,7 @@
                                             <span class="text-xl">🔔</span>
                                             <div>
                                                 <div class="font-heading font-bold text-sm text-[#2C3E50]">Enable Alarm Reminder</div>
-                                                <div class="text-xs text-gray-500 font-heading">Play sound & alert popup when due</div>
+                                                <div class="text-xs text-gray-500 font-heading">Status bar notification & alarm sound</div>
                                             </div>
                                         </div>
                                         <input type="checkbox" id="alarmEnabled" checked class="w-5 h-5 accent-[#FF6B6B] cursor-pointer" />
@@ -281,11 +275,11 @@
 
                                 <div class="bg-[#FFF9E6] p-4 doodle-box-alt flex flex-col justify-between">
                                     <div>
-                                        <h3 class="font-heading font-bold text-lg text-[#1D3557] mb-2">🧸 Quick Tips & Alarms:</h3>
-                                        <ul class="font-heading text-sm space-y-2 text-gray-700">
-                                            <li>• Tap <strong>Enable Background Engine</strong> top right first.</li>
-                                            <li>• Alarms ring <strong>non-stop</strong> until you click Dismiss.</li>
-                                            <li>• Push notifications work on background app switching.</li>
+                                        <h3 class="font-heading font-bold text-lg text-[#1D3557] mb-2">🧸 Priority Rulebook:</h3>
+                                        <ul class="font-heading text-xs space-y-1.5 text-gray-700">
+                                            <li>• 🔥 <strong>High:</strong> Infinite sound loop + status bar notification.</li>
+                                            <li>• ⚡ <strong>Medium:</strong> 3 audio beeps + status bar notification.</li>
+                                            <li>• 🌱 <strong>Low:</strong> Vibration only + status bar notification.</li>
                                         </ul>
                                     </div>
 
@@ -304,7 +298,7 @@
                     </div>
                 </div>
 
-                <!-- SLIDE 2: TASK CANVAS & FILTER BOARD -->
+                <!-- SLIDE 2: TASK CANVAS -->
                 <div class="slide-page flex items-center justify-center">
                     <div class="w-full max-w-5xl h-full bg-[#FFFDF0] doodle-box p-5 flex flex-col justify-between overflow-hidden">
                         <div class="flex flex-col h-full overflow-hidden">
@@ -352,14 +346,14 @@
                     </div>
                 </div>
 
-                <!-- SLIDE 3: STATS & PLYER NOTIFICATION LOGS -->
+                <!-- SLIDE 3: STATS & LOGS -->
                 <div class="slide-page flex items-center justify-center">
                     <div class="w-full max-w-4xl h-full bg-[#FFFDF0] doodle-box p-5 flex flex-col justify-between overflow-y-auto">
                         <div>
                             <div class="flex items-center justify-between border-b-4 border-dashed border-[#2C3E50] pb-3 mb-4">
                                 <div>
                                     <h2 class="font-sniglet text-3xl font-extrabold text-[#1D3557]">
-                                        📊 SLIDE 3: STATS & PLYER LOGS
+                                        📊 SLIDE 3: STATS & LOGS
                                     </h2>
                                     <p class="font-heading text-sm text-gray-600">App performance analytics and background notifications log stream.</p>
                                 </div>
@@ -488,7 +482,6 @@
         renderTasks();
         setInterval(checkAlarmEngine, 1000);
 
-        // Auto request permission on startup
         window.addEventListener('load', () => {
             if ("Notification" in window && Notification.permission !== "granted") {
                 Notification.requestPermission();
@@ -508,9 +501,9 @@
             if ("Notification" in window) {
                 const perm = await Notification.requestPermission();
                 if (perm === "granted") {
-                    appendLog("System Notifications Bar: ALLOWED");
+                    appendLog("Status Bar Notifications: ALLOWED");
                 } else {
-                    alert("Please allow notifications so reminders can hit your phone status bar!");
+                    alert("Please allow notifications so reminders can hit your status bar!");
                 }
             }
 
@@ -524,7 +517,7 @@
                     silentAudio.play().catch(e => console.log("Audio lock error:", e));
                 }
 
-                alert("Background Engine Activated! Alarms will push to your phone's notification bar.");
+                alert("Background Engine Activated! Alarms will push to your status bar.");
                 appendLog("Background Engine LOCKED & ACTIVE");
             } catch (e) {
                 alert("Tap anywhere on the screen first to enable permissions.");
@@ -554,31 +547,43 @@
             saveToSQLiteStorage();
             renderTasks();
 
-            // Play continuous web audio loop
-            playNonStopAlarmSound();
+            let notificationBody = "Your task is due now!";
 
-            // PUSH NOTIFICATION TO PHONE NOTIFICATION BAR VIA SERVICE WORKER
+            // Priority Sound Handling
+            if (task.priority === 'High') {
+                playNonStopAlarmSound();
+                notificationBody = "🔥 HIGH PRIORITY: Task due right now!";
+            } else if (task.priority === 'Medium') {
+                playMediumBeeps();
+                notificationBody = "⚡ Medium Priority: Task reminder due.";
+            } else {
+                notificationBody = "🌱 Low Priority: Task notification.";
+            }
+
+            // Push Notification to Service Worker for Phone Notification Bar
             if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
                     action: 'TRIGGER_ALARM',
-                    title: `⚠️ ALARM: ${task.title}`,
-                    body: `Your scheduled task is due right now!`
+                    priority: task.priority,
+                    title: `⚠️ ALARM (${task.priority}): ${task.title}`,
+                    body: notificationBody
                 });
             } else if ("Notification" in window && Notification.permission === "granted") {
-                // Fallback direct web notification
                 new Notification(`⚠️ ALARM: ${task.title}`, {
-                    body: `Your scheduled task is due right now!`,
+                    body: notificationBody,
                     icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23FFD166'/%3E%3C/svg%3E",
-                    requireInteraction: true
+                    requireInteraction: task.priority === 'High'
                 });
             }
 
-            // Show In-App Alarm Modal
-            document.getElementById('alarmModalTitle').innerText = task.title;
-            document.getElementById('alarmModalTime').innerText = `⏰ Scheduled Warning: ${task.dueDate} at ${format12Hour(task.dueTime)}`;
-            document.getElementById('alarmModal').classList.remove('opacity-0', 'pointer-events-none');
+            // Show In-App Modal (for High and Medium)
+            if (task.priority !== 'Low') {
+                document.getElementById('alarmModalTitle').innerText = task.title;
+                document.getElementById('alarmModalTime').innerText = `⏰ Priority: ${task.priority} | Due at ${format12Hour(task.dueTime)}`;
+                document.getElementById('alarmModal').classList.remove('opacity-0', 'pointer-events-none');
+            }
 
-            appendLog(`ALARM PUSHED TO STATUS BAR: "${task.title}"`);
+            appendLog(`ALARM (${task.priority}): "${task.title}" triggered.`);
         }
 
         function playNonStopAlarmSound() {
@@ -608,6 +613,39 @@
                 alarmInterval = setInterval(playBurst, 400);
             } catch (e) {
                 console.log("Audio play error:", e);
+            }
+        }
+
+        function playMediumBeeps() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                let beepCount = 0;
+                const playSingleBeep = () => {
+                    if (beepCount >= 3) return;
+                    
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+
+                    beepCount++;
+                    if (beepCount < 3) {
+                        setTimeout(playSingleBeep, 500);
+                    }
+                };
+                playSingleBeep();
+            } catch (e) {
+                console.log("Medium beep audio error:", e);
             }
         }
 
@@ -760,8 +798,7 @@
                                     class="px-3 py-1 text-xs font-heading font-bold rounded-lg border-2 border-[#2C3E50] ${isDone ? 'bg-green-200 text-[#2C3E50]' : 'bg-[#FFD166] text-[#2C3E50]'}">
                                     ${isDone ? '✅ Completed' : '⏳ Mark Done'}
                                 </button>
-                                <button onclick="deleteTask(${t.id})" 
-                                    class="text-red-500 hover:text-red-700 p-1 text-sm">
+                                <button onclick="deleteTask(${t.id})" class="text-red-500 hover:text-red-700 p-1 text-sm">
                                     <i class="fa-solid fa-trash-can"></i>
                                 </button>
                             </div>
