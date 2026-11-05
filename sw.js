@@ -1,4 +1,4 @@
-// sw.js - Service Worker for Heads-Up Center Screen Popups
+// sw.js - Service Worker with Fixed Low Priority Vibration & Center Popups
 self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
@@ -13,17 +13,18 @@ self.addEventListener('message', (event) => {
         const title = event.data.title || "⚠️ ALARM DUE!";
         const body = event.data.body || "Your task is due now!";
         
-        let vibratePattern = [300, 100, 300];
+        let vibratePattern = [200, 100, 200];
         let requireInteractionSetting = false;
 
         if (priority === 'High') {
-            vibratePattern = [500, 200, 500, 200, 500, 200, 500];
+            vibratePattern = [500, 200, 500, 200, 500];
             requireInteractionSetting = true;
         } else if (priority === 'Medium') {
-            vibratePattern = [200, 100, 200];
+            vibratePattern = [300, 100, 300];
             requireInteractionSetting = true;
-        } else {
-            vibratePattern = [150];
+        } else if (priority === 'Low') {
+            // Distinct multi-pulse vibration pattern for Low priority so it triggers reliably on mobile
+            vibratePattern = [100, 50, 100]; 
             requireInteractionSetting = false;
         }
 
@@ -35,8 +36,8 @@ self.addEventListener('message', (event) => {
             tag: 'task-alarm-' + Date.now(),
             requireInteraction: requireInteractionSetting,
             renotify: true,
-            priority: 'high', // Forces high notification priority
-            visibility: 'public', // Makes it visible on locked screens
+            priority: 'high',
+            visibility: 'public',
             actions: [
                 { action: 'open', title: '📂 Open App' },
                 { action: 'dismiss', title: '❌ Dismiss' }
