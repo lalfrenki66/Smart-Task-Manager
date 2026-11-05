@@ -512,7 +512,41 @@
         // Alarm Clock Tick Engine (Runs every second)
         setInterval(checkAlarmEngine, 1000);
 
-        // 1. INITIALIZE BACKGROUND ENGINE (Service Worker & Audio Unlock)
+        // Auto-request notification permissions on page load
+        window.addEventListener('load', () => {
+            requestNotificationPermission();
+        });
+
+        // 1. REQUEST NOTIFICATION PERMISSION
+        async function requestNotificationPermission() {
+            if ("Notification" in window) {
+                const perm = await Notification.requestPermission();
+                if (perm === "granted") {
+                    appendLog("Notification Permission Granted!");
+                } else {
+                    appendLog("Notification Permission Denied.");
+                }
+            }
+        }
+
+        // 2. DETECT APP EXIT & SCREEN LOCK
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                triggerExitNotification();
+            }
+        });
+
+        function triggerExitNotification() {
+            if (navigator.serviceWorker && navigator.serviceWorker.controller && Notification.permission === 'granted') {
+                navigator.serviceWorker.controller.postMessage({
+                    action: 'SHOW_NOTIFICATION',
+                    title: 'Doodle Task Manager ✏️',
+                    body: 'App running in background. Your scheduled alarms will ring automatically!'
+                });
+            }
+        }
+
+        // 3. INITIALIZE BACKGROUND ENGINE (Service Worker & Audio Unlock)
         async function initBackgroundEngine() {
             if ('serviceWorker' in navigator) {
                 try {
@@ -523,12 +557,7 @@
                 }
             }
 
-            if ("Notification" in window) {
-                const perm = await Notification.requestPermission();
-                if (perm === "granted") {
-                    appendLog("System Notifications: ALLOWED");
-                }
-            }
+            await requestNotificationPermission();
 
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -577,14 +606,14 @@
             // Trigger Push Notification via Service Worker (works when switching apps)
             if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
-                    type: 'TRIGGER_ALARM',
+                    action: 'SHOW_NOTIFICATION',
                     title: `⚠️ ALARM: ${task.title}`,
                     body: `Your task is due now!`
                 });
             } else if ("Notification" in window && Notification.permission === "granted") {
                 new Notification(`⚠️ ALARM: ${task.title}`, {
                     body: `Your task is due now!`,
-                    icon: "https://cdn-icons-png.flaticon.com/512/3236/3236940.png"
+                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23FFD166'/%3E%3C/svg%3E"
                 });
             }
 
