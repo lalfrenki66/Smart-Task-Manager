@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group 5: Doodle Smart Task Manager ✏️🎨</title>
+    
+    <!-- Google Fonts for Cartoon & Sketch Aesthetic -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Patrick+Hand&family=Sniglet:wght@400;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* Custom Doodle & Horizontal Slider Styles */
+        body {
+            font-family: 'Patrick Hand', cursive, sans-serif;
+            background-color: #FFFDF0; /* Sketchbook paper color */
+            background-image: radial-gradient(#E5D9C5 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            color: #2C3E50;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Fredoka', cursive, sans-serif;
+        }
+
+        .font-sniglet {
+            font-family: 'Sniglet', cursive, sans-serif;
+        }
+
+        /* Doodle Box & Buttons */
+        .doodle-box {
+            border: 3px solid #2C3E50;
+            border-radius: 18px 255px 15px 225px/255px 15px 225px 15px;
+            box-shadow: 5px 6px 0px #2C3E50;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .doodle-box-alt {
+            border: 3px solid #2C3E50;
+            border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+            box-shadow: 4px 5px 0px #2C3E50;
+        }
+
+        .doodle-btn {
+            border: 3px solid #2C3E50;
+            border-radius: 20px 8px 18px 10px;
+            box-shadow: 4px 4px 0px #2C3E50;
+            font-family: 'Fredoka', cursive, sans-serif;
+            transition: all 0.15s ease;
+        }
+
+        .doodle-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #2C3E50;
+        }
+
+        .doodle-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #2C3E50;
+        }
+
+        .doodle-input {
+            border: 3px solid #2C3E50;
+            border-radius: 12px 18px 10px 15px;
+            box-shadow: 3px 3px 0px #2C3E50;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.25rem;
+        }
+
+        .doodle-input:focus {
+            outline: none;
+            box-shadow: 4px 4px 0px #FFD166;
+            border-color: #2C3E50;
+        }
+
+        /* Horizontal Carousel Slider */
+        .slider-wrapper {
+            display: flex;
+            width: 300vw;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .slide-page {
+            width: 100vw;
+            height: 100%;
+            flex-shrink: 0;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFF9E6;
+            border-left: 2px solid #2C3E50;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FF9F1C;
+            border: 2px solid #2C3E50;
+            border-radius: 10px;
+        }
+
+        .win-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid #2C3E50;
+        }
+
+        /* Pulse Animation for Ringing Alarms */
+        @keyframes doodle-pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.05) rotate(-2deg); }
+            75% { transform: scale(1.05) rotate(2deg); }
+        }
+        .ring-alarm {
+            animation: doodle-pulse 0.4s infinite;
+            background-color: #FF6B6B !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body class="w-screen h-screen flex flex-col justify-between select-none overflow-hidden p-2 md:p-3">
+
+    <!-- FULLSCREEN DESKTOP APPLICATION SHELL -->
+    <div class="w-full h-full bg-[#FFF9E6] doodle-box flex flex-col overflow-hidden relative">
+        
+        <!-- TOP DESKTOP WINDOW BAR & HORIZONTAL SLIDE NAV TABS -->
+        <div class="bg-[#FFD166] border-b-4 border-[#2C3E50] p-2 px-4 flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0 z-30">
+            <!-- App Details -->
+            <div class="flex items-center space-x-2">
+                <div class="win-dot bg-[#FF6B6B]"></div>
+                <div class="win-dot bg-[#FFD166]"></div>
+                <div class="win-dot bg-[#4ECDC4]"></div>
+                <span class="font-heading font-bold text-base text-[#2C3E50] ml-2 tracking-wide">
+                    ✏️ Group 5: Smart Task Manager
+                </span>
+            </div>
+
+            <!-- Horizontal Slide Navigation Tabs -->
+            <div class="flex items-center gap-2 bg-[#FFFDF0] p-1 rounded-full border-2 border-[#2C3E50] shadow-[2px_2px_0px_#2C3E50]">
+                <button onclick="goToSlide(0)" id="navSlide0" 
+                    class="px-3 py-1 font-heading font-bold text-xs rounded-full transition-all bg-[#2C3E50] text-white">
+                    1. Create & Plan 📌
+                </button>
+                <button onclick="goToSlide(1)" id="navSlide1" 
+                    class="px-3 py-1 font-heading font-bold text-xs rounded-full transition-all text-[#2C3E50] hover:bg-yellow-200">
+                    2. Task Canvas 📋
+                </button>
+                <button onclick="goToSlide(2)" id="navSlide2" 
+                    class="px-3 py-1 font-heading font-bold text-xs rounded-full transition-all text-[#2C3E50] hover:bg-yellow-200">
+                    3. Stats & Logs 📊
+                </button>
+            </div>
+
+            <!-- Group Info -->
+            <div class="hidden lg:flex items-center space-x-2 font-heading text-xs font-bold bg-[#FFFDF0] px-3 py-1 rounded-full border-2 border-[#2C3E50]">
+                <span>👥 Frankie, Ropekhlua, Andrew, Laltharzuala</span>
+            </div>
+        </div>
+
+        <!-- FLOATING SIDE CAROUSEL ARROWS -->
+        <button onclick="prevSlide()" id="prevArrow" 
+            class="fixed left-6 top-1/2 -translate-y-1/2 z-40 w-12 h-12 bg-[#FFD166] text-[#2C3E50] doodle-btn rounded-full flex items-center justify-center text-xl font-extrabold opacity-40 pointer-events-none">
+            ←
+        </button>
+        <button onclick="nextSlide()" id="nextArrow" 
+            class="fixed right-6 top-1/2 -translate-y-1/2 z-40 w-12 h-12 bg-[#FFD166] text-[#2C3E50] doodle-btn rounded-full flex items-center justify-center text-xl font-extrabold">
+            →
+        </button>
+
+        <!-- HORIZONTAL SLIDES WRAPPER -->
+        <div class="flex-grow overflow-hidden relative">
+            <div id="sliderWrapper" class="slider-wrapper">
+                
+                <!-- SLIDE 1: CREATE & PLAN WORKSPACE -->
+                <div class="slide-page flex items-center justify-center">
+                    <div class="w-full max-w-4xl h-full bg-[#FFFDF0] doodle-box p-5 flex flex-col justify-between overflow-y-auto">
+                        <div>
+                            <div class="flex items-center justify-between border-b-4 border-dashed border-[#2C3E50] pb-3 mb-4">
+                                <div>
+                                    <h2 class="font-sniglet text-3xl font-extrabold text-[#1D3557]">
+                                        📌 SLIDE 1: CREATE NEW TASK
+                                    </h2>
+                                    <p class="font-heading text-sm text-gray-600">Enter task details to store in SQLite DB & trigger Plyer Notification.</p>
+                                </div>
+                                <span class="bg-[#FF6B6B] text-white font-heading font-bold text-xs px-3 py-1 rounded-full border-2 border-[#2C3E50]">
+                                    Input Dock
+                                </span>
+                            </div>
+
+                            <form id="taskForm" onsubmit="handleAddTask(event)" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="font-heading block text-base font-bold text-[#2C3E50] mb-1">
+                                            Task Description <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="text" id="taskTitle" required placeholder="e.g. Build Tkinter GUI layout..." 
+                                            class="w-full p-3 bg-white doodle-input text-lg text-[#2C3E50]" />
+                                    </div>
+
+                                    <div>
+                                        <label class="font-heading block text-base font-bold text-[#2C3E50] mb-1">
+                                            Priority Level
+                                        </label>
+                                        <div class="grid grid-cols-3 gap-2">
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="priority" value="High" class="peer hidden" />
+                                                <div class="p-2 text-center font-heading font-bold text-sm rounded-xl border-2 border-[#2C3E50] bg-white peer-checked:bg-[#FF6B6B] peer-checked:text-white transition-all shadow-[2px_2px_0px_#2C3E50]">
+                                                    🔥 High
+                                                </div>
+                                            </label>
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="priority" value="Medium" checked class="peer hidden" />
+                                                <div class="p-2 text-center font-heading font-bold text-sm rounded-xl border-2 border-[#2C3E50] bg-white peer-checked:bg-[#FFD166] peer-checked:text-[#2C3E50] transition-all shadow-[2px_2px_0px_#2C3E50]">
+                                                    ⚡ Med
+                                                </div>
+                                            </label>
+                                            <label class="cursor-pointer">
+                                                <input type="radio" name="priority" value="Low" class="peer hidden" />
+                                                <div class="p-2 text-center font-heading font-bold text-sm rounded-xl border-2 border-[#2C3E50] bg-white peer-checked:bg-[#4ECDC4] peer-checked:text-white transition-all shadow-[2px_2px_0px_#2C3E50]">
+                                                    🌱 Low
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="font-heading block text-base font-bold text-[#2C3E50] mb-1">
+                                                📅 Due Date
+                                            </label>
+                                            <input type="date" id="dueDate" required
+                                                class="w-full p-2.5 bg-white doodle-input text-base text-[#2C3E50]" />
+                                        </div>
+                                        <div>
+                                            <label class="font-heading block text-base font-bold text-[#2C3E50] mb-1">
+                                                ⏰ Alarm Time
+                                            </label>
+                                            <input type="time" id="dueTime" required
+                                                class="w-full p-2.5 bg-white doodle-input text-base text-[#2C3E50]" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Enable Alarm Switch -->
+                                    <div class="flex items-center justify-between bg-white p-3 rounded-xl border-2 border-[#2C3E50] shadow-[2px_2px_0px_#2C3E50]">
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-xl">🔔</span>
+                                            <div>
+                                                <div class="font-heading font-bold text-sm text-[#2C3E50]">Enable Alarm Reminder</div>
+                                                <div class="text-xs text-gray-500 font-heading">Play sound & alert popup when due</div>
+                                            </div>
+                                        </div>
+                                        <input type="checkbox" id="alarmEnabled" checked class="w-5 h-5 accent-[#FF6B6B] cursor-pointer" />
+                                    </div>
+                                </div>
+
+                                <div class="bg-[#FFF9E6] p-4 doodle-box-alt flex flex-col justify-between">
+                                    <div>
+                                        <h3 class="font-heading font-bold text-lg text-[#1D3557] mb-2">🧸 Quick Tips & Alarms:</h3>
+                                        <ul class="font-heading text-sm space-y-2 text-gray-700">
+                                            <li>• Set exact time warnings for task reminders.</li>
+                                            <li>• Web Audio synthesizer plays cartoon bells when triggered.</li>
+                                            <li>• Alarms can be snoozed (+5 min) or dismissed.</li>
+                                            <li>• Works even when navigating between slides.</li>
+                                        </ul>
+                                    </div>
+
+                                    <button type="submit" 
+                                        class="w-full py-3 bg-[#4ECDC4] text-white font-bold text-xl doodle-btn flex items-center justify-center gap-2 mt-4">
+                                        <i class="fa-solid fa-bell"></i> Save & Set Alarm →
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="flex justify-between items-center text-xs font-heading text-gray-500 border-t-2 border-dashed border-[#2C3E50] pt-2 mt-4">
+                            <span>Tip: Press <strong>Right Arrow (→)</strong> on your keyboard to switch slides</span>
+                            <span>Slide 1 of 3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 2: TASK CANVAS & FILTER BOARD -->
+                <div class="slide-page flex items-center justify-center">
+                    <div class="w-full max-w-5xl h-full bg-[#FFFDF0] doodle-box p-5 flex flex-col justify-between overflow-hidden">
+                        <div class="flex flex-col h-full overflow-hidden">
+                            <!-- Header & Filter Bar -->
+                            <div class="space-y-3 border-b-4 border-dashed border-[#2C3E50] pb-3 mb-3 shrink-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                    <div>
+                                        <h2 class="font-sniglet text-3xl font-extrabold text-[#1D3557]">
+                                            📋 SLIDE 2: TASK BOARD CANVAS
+                                        </h2>
+                                        <p class="font-heading text-xs text-gray-600">Filter, search, toggle status or delete tasks.</p>
+                                    </div>
+
+                                    <div class="flex items-center gap-2">
+                                        <!-- Filter Controls -->
+                                        <div class="flex items-center gap-1 bg-[#FFF9E6] p-1 rounded-xl border-2 border-[#2C3E50]">
+                                            <button onclick="setFilter('All')" id="filterAll"
+                                                class="px-3 py-1 text-xs font-heading font-bold rounded-lg transition-all bg-[#2C3E50] text-white">
+                                                All
+                                            </button>
+                                            <button onclick="setFilter('Pending')" id="filterPending"
+                                                class="px-3 py-1 text-xs font-heading font-bold rounded-lg transition-all text-[#2C3E50] hover:bg-yellow-200">
+                                                ⏳ Pending
+                                            </button>
+                                            <button onclick="setFilter('Completed')" id="filterCompleted"
+                                                class="px-3 py-1 text-xs font-heading font-bold rounded-lg transition-all text-[#2C3E50] hover:bg-green-200">
+                                                ✅ Done
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Search Input -->
+                                <div class="relative">
+                                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
+                                    <input type="text" id="searchInput" oninput="renderTasks()" placeholder="Search tasks..." 
+                                        class="w-full pl-9 pr-3 py-2 bg-white doodle-input text-base text-[#2C3E50]" />
+                                </div>
+                            </div>
+
+                            <!-- Scrollable Task Grid -->
+                            <div id="taskList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto pr-1 flex-grow">
+                                <!-- Tasks dynamically populated -->
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center text-xs font-heading text-gray-500 border-t-2 border-dashed border-[#2C3E50] pt-2 mt-2 shrink-0">
+                            <span>Use <strong>← Left</strong> or <strong>Right →</strong> keys to navigate slides</span>
+                            <span>Slide 2 of 3</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 3: STATS & PLYER NOTIFICATION LOGS -->
+                <div class="slide-page flex items-center justify-center">
+                    <div class="w-full max-w-4xl h-full bg-[#FFFDF0] doodle-box p-5 flex flex-col justify-between overflow-y-auto">
+                        <div>
+                            <div class="flex items-center justify-between border-b-4 border-dashed border-[#2C3E50] pb-3 mb-4">
+                                <div>
+                                    <h2 class="font-sniglet text-3xl font-extrabold text-[#1D3557]">
+                                        📊 SLIDE 3: STATS & PLYER LOGS
+                                    </h2>
+                                    <p class="font-heading text-sm text-gray-600">App performance analytics and desktop notifications log stream.</p>
+                                </div>
+                                <span class="bg-[#4ECDC4] text-white font-heading font-bold text-xs px-3 py-1 rounded-full border-2 border-[#2C3E50]">
+                                    Metrics
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Progress Card -->
+                                <div class="bg-white p-4 doodle-box flex flex-col justify-between">
+                                    <h3 class="font-heading font-bold text-lg text-[#1D3557] mb-2">📈 Overall Completion</h3>
+                                    <div class="flex items-center justify-between font-heading font-bold text-sm mb-1">
+                                        <span>Status Rate</span>
+                                        <span id="progressPercent">0%</span>
+                                    </div>
+                                    <div class="w-full h-4 bg-gray-200 rounded-full border-2 border-[#2C3E50] overflow-hidden mb-3">
+                                        <div id="progressBar" class="h-full bg-[#4ECDC4] transition-all duration-300" style="width: 0%"></div>
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-2 text-center font-heading">
+                                        <div class="bg-[#FFD166] p-2 rounded-xl border-2 border-[#2C3E50]">
+                                            <div class="text-xs text-[#2C3E50]">Pending Tasks</div>
+                                            <div id="statPending" class="text-2xl font-extrabold text-[#1D3557]">0</div>
+                                        </div>
+                                        <div class="bg-[#4ECDC4] p-2 rounded-xl border-2 border-[#2C3E50]">
+                                            <div class="text-xs text-white">Completed</div>
+                                            <div id="statCompleted" class="text-2xl font-extrabold text-white">0</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Plyer Desktop Notification Stream -->
+                                <div class="bg-[#1D3557] text-white p-4 doodle-box flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex items-center justify-between border-b border-gray-600 pb-2 mb-2">
+                                            <span class="font-heading font-bold text-sm text-yellow-300">🔔 Plyer Push Logs</span>
+                                            <span class="text-xs bg-green-500 text-black px-2 py-0.5 rounded font-bold">Live Stream</span>
+                                        </div>
+                                        <div id="notificationLog" class="text-xs font-mono space-y-1 max-h-[160px] overflow-y-auto text-gray-300">
+                                            <div>> Plyer notification engine online.</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-[11px] font-heading text-gray-400 mt-2">
+                                        SQLite Database File: <code>group5_tasks.db</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center text-xs font-heading text-gray-500 border-t-2 border-dashed border-[#2C3E50] pt-2 mt-4">
+                            <span>Press <strong>← Left Arrow</strong> to return to Slide 2</span>
+                            <span>Slide 3 of 3</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- DESKTOP FOOTER STATUS BAR -->
+        <div class="bg-[#1D3557] text-[#FFFDF0] px-4 py-1.5 border-t-4 border-[#2C3E50] text-xs font-heading flex justify-between items-center shrink-0 z-30">
+            <span>💾 SQLite DB Status: <strong class="text-green-400">CONNECTED</strong> | Alarm Engine: <strong id="clockDisplay" class="text-yellow-300">00:00:00</strong></span>
+            <span>Group 5 Desktop App</span>
+        </div>
+    </div>
+
+    <!-- CARTOON ALARM WARNING MODAL -->
+    <div id="alarmModal" 
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="bg-[#FFFDF0] doodle-box max-w-md w-full p-6 text-center ring-alarm shadow-2xl relative">
+            <div class="w-16 h-16 bg-[#FFD166] text-black text-3xl rounded-full border-4 border-[#2C3E50] flex items-center justify-center mx-auto mb-3 shadow-[3px_3px_0px_#2C3E50] animate-bounce">
+                🔔
+            </div>
+            <h3 class="font-sniglet text-3xl font-extrabold text-white drop-shadow-[2px_2px_0px_#2C3E50]">
+                ALARM WARNING!
+            </h3>
+            <p class="font-heading font-bold text-lg text-white mt-1" id="alarmModalTitle">Task is Due Now!</p>
+            <div class="bg-white/90 text-[#2C3E50] p-3 doodle-box-alt my-4 font-heading text-sm" id="alarmModalTime">
+                ⏰ Scheduled: 00:00 PM
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3 mt-4">
+                <button onclick="snoozeActiveAlarm()" 
+                    class="py-2.5 bg-[#FFD166] text-[#2C3E50] font-heading font-bold text-base doodle-btn flex items-center justify-center gap-2">
+                    💤 Snooze +5m
+                </button>
+                <button onclick="dismissActiveAlarm()" 
+                    class="py-2.5 bg-[#2C3E50] text-white font-heading font-bold text-base doodle-btn flex items-center justify-center gap-2">
+                    ✅ Dismiss
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SIMULATED PLYER DESKTOP TOAST NOTIFICATION -->
+    <div id="notificationToast" 
+        class="fixed top-16 right-6 bg-[#FFFDF0] doodle-box p-3 max-w-xs w-full shadow-2xl transition-all duration-300 transform -translate-y-32 opacity-0 z-50 pointer-events-none">
+        <div class="flex items-start gap-3">
+            <div class="text-2xl">🔔</div>
+            <div>
+                <h4 class="font-heading font-bold text-xs text-[#FF6B6B]" id="notifTitle">Plyer Notification</h4>
+                <p class="text-xs font-heading text-[#2C3E50] mt-0.5" id="notifMessage">New task added!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE & APP INTERACTION JAVASCRIPT -->
+    <script>
+        document.getElementById('dueDate').valueAsDate = new Date();
+        
+        // Set default time input to current time + 5 minutes
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 5);
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        document.getElementById('dueTime').value = `${hours}:${minutes}`;
+
+        let currentSlide = 0;
+        const totalSlides = 3;
+        let activeRingingTaskId = null;
+        let audioCtx = null;
+
+        // FIXED: Starts empty for every new user / phone!
+        let tasks = JSON.parse(localStorage.getItem('group5_sqlite_tasks')) || [];
+
+        let currentFilter = 'All';
+
+        renderTasks();
+
+        // Alarm Clock Tick Engine (Runs every second)
+        setInterval(checkAlarmEngine, 1000);
+
+        function checkAlarmEngine() {
+            const currentTime = new Date();
+            const dateStr = currentTime.toISOString().split('T')[0];
+            const timeStr = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            
+            document.getElementById('clockDisplay').innerText = timeStr;
+
+            const currentHoursMinutes = `${String(currentTime.getHours()).padStart(2, '0')}:${String(currentTime.getMinutes()).padStart(2, '0')}`;
+
+            tasks.forEach(task => {
+                if (task.status === 'Pending' && task.alarmEnabled && !task.triggered) {
+                    if (task.dueDate === dateStr && task.dueTime <= currentHoursMinutes) {
+                        triggerTaskAlarm(task);
+                    }
+                }
+            });
+        }
+
+        function triggerTaskAlarm(task) {
+            task.triggered = true;
+            activeRingingTaskId = task.id;
+            saveToSQLiteStorage();
+            renderTasks();
+
+            playCartoonAlarmSound();
+
+            document.getElementById('alarmModalTitle').innerText = task.title;
+            document.getElementById('alarmModalTime').innerText = `⏰ Scheduled Warning: ${task.dueDate} at ${format12Hour(task.dueTime)}`;
+            
+            const modal = document.getElementById('alarmModal');
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+
+            triggerNotification('⚠️ ALARM WARNING!', `Task "${task.title}" is due now!`);
+        }
+
+        function playCartoonAlarmSound() {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                [0, 0.2, 0.4, 0.6].forEach(delay => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime + delay);
+                    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + delay + 0.15);
+                    
+                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime + delay);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + 0.15);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(audioCtx.currentTime + delay);
+                    osc.stop(audioCtx.currentTime + delay + 0.15);
+                });
+            } catch (e) {
+                console.log("Audio play blocked by browser policy until interaction");
+            }
+        }
+
+        function snoozeActiveAlarm() {
+            if (!activeRingingTaskId) return;
+            
+            tasks = tasks.map(t => {
+                if (t.id === activeRingingTaskId) {
+                    const snoozeTime = new Date();
+                    snoozeTime.setMinutes(snoozeTime.getMinutes() + 5);
+                    const h = String(snoozeTime.getHours()).padStart(2, '0');
+                    const m = String(snoozeTime.getMinutes()).padStart(2, '0');
+                    return { ...t, dueTime: `${h}:${m}`, triggered: false };
+                }
+                return t;
+            });
+
+            saveToSQLiteStorage();
+            closeAlarmModal();
+            renderTasks();
+            triggerNotification('💤 Alarm Snoozed', 'Reminding you again in 5 minutes!');
+        }
+
+        function dismissActiveAlarm() {
+            closeAlarmModal();
+        }
+
+        function closeAlarmModal() {
+            const modal = document.getElementById('alarmModal');
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            activeRingingTaskId = null;
+        }
+
+        function handleAddTask(e) {
+            e.preventDefault();
+            const title = document.getElementById('taskTitle').value.trim();
+            const priority = document.querySelector('input[name="priority"]:checked').value;
+            const dueDate = document.getElementById('dueDate').value;
+            const dueTime = document.getElementById('dueTime').value;
+            const alarmEnabled = document.getElementById('alarmEnabled').checked;
+
+            if (!title) return;
+
+            const newTask = {
+                id: Date.now(),
+                title,
+                priority,
+                dueDate,
+                dueTime,
+                alarmEnabled,
+                status: 'Pending',
+                triggered: false
+            };
+
+            tasks.unshift(newTask);
+            saveToSQLiteStorage();
+            renderTasks();
+
+            document.getElementById('taskForm').reset();
+            document.getElementById('dueDate').valueAsDate = new Date();
+            
+            triggerNotification('💾 SQLite Saved', `Task added: "${title}"`);
+            goToSlide(1); // Auto switch to Task Canvas slide
+        }
+
+        function toggleTaskStatus(id) {
+            tasks = tasks.map(t => {
+                if (t.id === id) {
+                    const newStatus = t.status === 'Pending' ? 'Completed' : 'Pending';
+                    if (newStatus === 'Completed') {
+                        confetti({ particleCount: 60, spread: 60, origin: { y: 0.8 } });
+                    }
+                    return { ...t, status: newStatus };
+                }
+                return t;
+            });
+            saveToSQLiteStorage();
+            renderTasks();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveToSQLiteStorage();
+            renderTasks();
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            ['All', 'Pending', 'Completed'].forEach(f => {
+                const btn = document.getElementById(`filter${f}`);
+                if (f === filter) {
+                    btn.className = 'px-3 py-1 text-xs font-heading font-bold rounded-lg transition-all bg-[#2C3E50] text-white';
+                } else {
+                    btn.className = 'px-3 py-1 text-xs font-heading font-bold rounded-lg transition-all text-[#2C3E50] hover:bg-yellow-200';
+                }
+            });
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const listEl = document.getElementById('taskList');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+
+            const filtered = tasks.filter(t => {
+                const matchesSearch = t.title.toLowerCase().includes(searchVal);
+                if (currentFilter === 'Pending') return matchesSearch && t.status === 'Pending';
+                if (currentFilter === 'Completed') return matchesSearch && t.status === 'Completed';
+                return matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-gray-400 font-heading text-lg">
+                        ✏️ No tasks found in SQLite database. Add your first task in Slide 1!
+                    </div>
+                `;
+            } else {
+                listEl.innerHTML = filtered.map(t => {
+                    const priorityColor = t.priority === 'High' ? 'bg-[#FF6B6B] text-white' : (t.priority === 'Medium' ? 'bg-[#FFD166] text-[#2C3E50]' : 'bg-[#4ECDC4] text-white');
+                    const isDone = t.status === 'Completed';
+                    return `
+                        <div class="bg-white p-3.5 doodle-box flex flex-col justify-between transition-all ${isDone ? 'opacity-60 bg-gray-50' : ''}">
+                            <div>
+                                <div class="flex items-center justify-between gap-2 mb-2">
+                                    <span class="text-xs font-heading font-bold px-2.5 py-0.5 rounded-full border-2 border-[#2C3E50] ${priorityColor}">
+                                        ${t.priority}
+                                    </span>
+                                    <span class="text-xs font-heading font-bold text-gray-500">
+                                        📅 ${t.dueDate}
+                                    </span>
+                                </div>
+                                <h4 class="font-heading font-bold text-base text-[#2C3E50] mb-1 line-clamp-2 ${isDone ? 'line-through text-gray-400' : ''}">
+                                    ${t.title}
+                                </h4>
+                                <div class="text-xs font-heading text-gray-500 mb-3">
+                                    ⏰ Alarm: ${format12Hour(t.dueTime)} ${t.alarmEnabled ? '🔔' : '🔕'}
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between pt-2 border-t-2 border-dashed border-gray-200">
+                                <button onclick="toggleTaskStatus(${t.id})" 
+                                    class="px-3 py-1 text-xs font-heading font-bold rounded-lg border-2 border-[#2C3E50] ${isDone ? 'bg-green-200 text-[#2C3E50]' : 'bg-[#FFD166] text-[#2C3E50]'}">
+                                    ${isDone ? '✅ Completed' : '⏳ Mark Done'}
+                                </button>
+                                <button onclick="deleteTask(${t.id})" 
+                                    class="text-red-500 hover:text-red-700 p-1 text-sm">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            updateStats();
+        }
+
+        function updateStats() {
+            const total = tasks.length;
+            const completed = tasks.filter(t => t.status === 'Completed').length;
+            const pending = total - completed;
+            const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('statPending').innerText = pending;
+            document.getElementById('statCompleted').innerText = completed;
+            document.getElementById('progressPercent').innerText = `${percent}%`;
+            document.getElementById('progressBar').style.width = `${percent}%`;
+        }
+
+        function format12Hour(timeStr) {
+            if (!timeStr) return '';
+            const [h, m] = timeStr.split(':');
+            let hours = parseInt(h, 10);
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            return `${hours}:${m} ${ampm}`;
+        }
+
+        function saveToSQLiteStorage() {
+            localStorage.setItem('group5_sqlite_tasks', JSON.stringify(tasks));
+        }
+
+        function triggerNotification(title, message) {
+            const toast = document.getElementById('notificationToast');
+            document.getElementById('notifTitle').innerText = title;
+            document.getElementById('notifMessage').innerText = message;
+
+            toast.classList.remove('-translate-y-32', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-32', 'opacity-0');
+            }, 3500);
+
+            const logStream = document.getElementById('notificationLog');
+            const timeStamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            logStream.innerHTML += `<div>[${timeStamp}] ${title}: ${message}</div>`;
+            logStream.scrollTop = logStream.scrollHeight;
+        }
+
+        // Horizontal Slide Navigation
+        function goToSlide(index) {
+            currentSlide = index;
+            const wrapper = document.getElementById('sliderWrapper');
+            wrapper.style.transform = `translateX(-${currentSlide * 100}vw)`;
+
+            // Update Nav Tab Styles
+            for (let i = 0; i < totalSlides; i++) {
+                const tab = document.getElementById(`navSlide${i}`);
+                if (i === currentSlide) {
+                    tab.className = 'px-3 py-1 font-heading font-bold text-xs rounded-full transition-all bg-[#2C3E50] text-white';
+                } else {
+                    tab.className = 'px-3 py-1 font-heading font-bold text-xs rounded-full transition-all text-[#2C3E50] hover:bg-yellow-200';
+                }
+            }
+
+            // Arrow Opacity & Visibility
+            document.getElementById('prevArrow').style.opacity = currentSlide === 0 ? '0.4' : '1';
+            document.getElementById('prevArrow').style.pointerEvents = currentSlide === 0 ? 'none' : 'auto';
+            document.getElementById('nextArrow').style.opacity = currentSlide === totalSlides - 1 ? '0.4' : '1';
+            document.getElementById('nextArrow').style.pointerEvents = currentSlide === totalSlides - 1 ? 'none' : 'auto';
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) goToSlide(currentSlide + 1);
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) goToSlide(currentSlide - 1);
+        }
+
+        // Keyboard Arrow Key Navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key === 'ArrowRight') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+    </script>
+</body>
+</html>
