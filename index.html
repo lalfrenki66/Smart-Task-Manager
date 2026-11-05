@@ -172,9 +172,11 @@
                 </button>
             </div>
 
-            <!-- Group Info -->
-            <div class="hidden lg:flex items-center space-x-2 font-heading text-xs font-bold bg-[#FFFDF0] px-3 py-1 rounded-full border-2 border-[#2C3E50]">
-                <span>👥 Frankie, Ropekhlua, Andrew, Laltharzuala</span>
+            <!-- Background Engine Activation Button -->
+            <div class="flex items-center space-x-2">
+                <button onclick="initBackgroundEngine()" class="bg-[#FF6B6B] hover:bg-red-600 text-white font-heading text-xs font-bold px-3 py-1.5 rounded-full border-2 border-[#2C3E50] shadow-[2px_2px_0px_#2C3E50] animate-pulse">
+                    🔔 Enable Background Engine
+                </button>
             </div>
         </div>
 
@@ -201,7 +203,7 @@
                                     <h2 class="font-sniglet text-3xl font-extrabold text-[#1D3557]">
                                         📌 SLIDE 1: CREATE NEW TASK
                                     </h2>
-                                    <p class="font-heading text-sm text-gray-600">Enter task details to store in SQLite DB & trigger Plyer Notification.</p>
+                                    <p class="font-heading text-sm text-gray-600">Enter task details to store in SQLite DB & trigger background alarms.</p>
                                 </div>
                                 <span class="bg-[#FF6B6B] text-white font-heading font-bold text-xs px-3 py-1 rounded-full border-2 border-[#2C3E50]">
                                     Input Dock
@@ -278,10 +280,9 @@
                                     <div>
                                         <h3 class="font-heading font-bold text-lg text-[#1D3557] mb-2">🧸 Quick Tips & Alarms:</h3>
                                         <ul class="font-heading text-sm space-y-2 text-gray-700">
-                                            <li>• Set exact time warnings for task reminders.</li>
-                                            <li>• Web Audio synthesizer plays cartoon bells when triggered.</li>
-                                            <li>• Alarms can be snoozed (+5 min) or dismissed.</li>
-                                            <li>• Works even when navigating between slides.</li>
+                                            <li>• Tap <strong>Enable Background Engine</strong> top right first.</li>
+                                            <li>• Alarms ring <strong>non-stop</strong> until you click Dismiss.</li>
+                                            <li>• Push notifications work on background app switching.</li>
                                         </ul>
                                     </div>
 
@@ -363,7 +364,7 @@
                                     <h2 class="font-sniglet text-3xl font-extrabold text-[#1D3557]">
                                         📊 SLIDE 3: STATS & PLYER LOGS
                                     </h2>
-                                    <p class="font-heading text-sm text-gray-600">App performance analytics and desktop notifications log stream.</p>
+                                    <p class="font-heading text-sm text-gray-600">App performance analytics and background notifications log stream.</p>
                                 </div>
                                 <span class="bg-[#4ECDC4] text-white font-heading font-bold text-xs px-3 py-1 rounded-full border-2 border-[#2C3E50]">
                                     Metrics
@@ -393,15 +394,15 @@
                                     </div>
                                 </div>
 
-                                <!-- Plyer Desktop Notification Stream -->
+                                <!-- Push Notification Stream -->
                                 <div class="bg-[#1D3557] text-white p-4 doodle-box flex flex-col justify-between">
                                     <div>
                                         <div class="flex items-center justify-between border-b border-gray-600 pb-2 mb-2">
-                                            <span class="font-heading font-bold text-sm text-yellow-300">🔔 Plyer Push Logs</span>
+                                            <span class="font-heading font-bold text-sm text-yellow-300">🔔 Push & Alarm Logs</span>
                                             <span class="text-xs bg-green-500 text-black px-2 py-0.5 rounded font-bold">Live Stream</span>
                                         </div>
                                         <div id="notificationLog" class="text-xs font-mono space-y-1 max-h-[160px] overflow-y-auto text-gray-300">
-                                            <div>> Plyer notification engine online.</div>
+                                            <div>> Background alarm engine online.</div>
                                         </div>
                                     </div>
                                     <div class="text-[11px] font-heading text-gray-400 mt-2">
@@ -456,23 +457,27 @@
         </div>
     </div>
 
-    <!-- SIMULATED PLYER DESKTOP TOAST NOTIFICATION -->
+    <!-- SIMULATED TOAST NOTIFICATION -->
     <div id="notificationToast" 
         class="fixed top-16 right-6 bg-[#FFFDF0] doodle-box p-3 max-w-xs w-full shadow-2xl transition-all duration-300 transform -translate-y-32 opacity-0 z-50 pointer-events-none">
         <div class="flex items-start gap-3">
             <div class="text-2xl">🔔</div>
             <div>
-                <h4 class="font-heading font-bold text-xs text-[#FF6B6B]" id="notifTitle">Plyer Notification</h4>
+                <h4 class="font-heading font-bold text-xs text-[#FF6B6B]" id="notifTitle">Notification</h4>
                 <p class="text-xs font-heading text-[#2C3E50] mt-0.5" id="notifMessage">New task added!</p>
             </div>
         </div>
     </div>
 
+    <!-- HIDDEN AUDIO ELEMENT FOR BACKGROUND LOCK -->
+    <audio id="silentAudio" loop style="display:none;">
+        <source src="https://actions.google.com/sounds/v1/ambiences/rain_heavy.ogg" type="audio/ogg">
+    </audio>
+
     <!-- SLIDE & APP INTERACTION JAVASCRIPT -->
     <script>
         document.getElementById('dueDate').valueAsDate = new Date();
         
-        // Set default time input to current time + 5 minutes
         const now = new Date();
         now.setMinutes(now.getMinutes() + 5);
         const hours = String(now.getHours()).padStart(2, '0');
@@ -483,16 +488,51 @@
         const totalSlides = 3;
         let activeRingingTaskId = null;
         let audioCtx = null;
+        let alarmInterval = null;
+        let swRegistration = null;
 
-        // FIXED: Starts empty for every new user / phone!
         let tasks = JSON.parse(localStorage.getItem('group5_sqlite_tasks')) || [];
-
         let currentFilter = 'All';
 
         renderTasks();
 
         // Alarm Clock Tick Engine (Runs every second)
         setInterval(checkAlarmEngine, 1000);
+
+        // 1. INITIALIZE BACKGROUND ENGINE (Service Worker & Audio Unlock)
+        async function initBackgroundEngine() {
+            if ('serviceWorker' in navigator) {
+                try {
+                    swRegistration = await navigator.serviceWorker.register('sw.js');
+                    appendLog("Service Worker Registered for background sync.");
+                } catch (err) {
+                    console.error("SW registration failed", err);
+                }
+            }
+
+            if ("Notification" in window) {
+                const perm = await Notification.requestPermission();
+                if (perm === "granted") {
+                    appendLog("System Notifications: ALLOWED");
+                }
+            }
+
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+                const silentAudio = document.getElementById('silentAudio');
+                if (silentAudio) {
+                    silentAudio.volume = 0.01;
+                    silentAudio.play().catch(e => console.log("Audio lock error:", e));
+                }
+
+                alert("Background Engine Activated! Alarms will ring non-stop even when switching apps.");
+                appendLog("Background Engine LOCKED & ACTIVE");
+            } catch (e) {
+                alert("Tap anywhere on the screen first to enable permissions.");
+            }
+        }
 
         function checkAlarmEngine() {
             const currentTime = new Date();
@@ -518,7 +558,22 @@
             saveToSQLiteStorage();
             renderTasks();
 
-            playCartoonAlarmSound();
+            // Play non-stop looping alarm sound
+            playNonStopAlarmSound();
+
+            // Trigger Push Notification via Service Worker (works when switching apps)
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'TRIGGER_ALARM',
+                    title: `⚠️ ALARM: ${task.title}`,
+                    body: `Your task is due now!`
+                });
+            } else if ("Notification" in window && Notification.permission === "granted") {
+                new Notification(`⚠️ ALARM: ${task.title}`, {
+                    body: `Your task is due now!`,
+                    icon: "https://cdn-icons-png.flaticon.com/512/3236/3236940.png"
+                });
+            }
 
             document.getElementById('alarmModalTitle').innerText = task.title;
             document.getElementById('alarmModalTime').innerText = `⏰ Scheduled Warning: ${task.dueDate} at ${format12Hour(task.dueTime)}`;
@@ -526,34 +581,49 @@
             const modal = document.getElementById('alarmModal');
             modal.classList.remove('opacity-0', 'pointer-events-none');
 
-            triggerNotification('⚠️ ALARM WARNING!', `Task "${task.title}" is due now!`);
+            appendLog(`ALARM TRIGGERED: "${task.title}"`);
         }
 
-        function playCartoonAlarmSound() {
+        // NON-STOP INFINITE ALARM SOUND LOOP
+        function playNonStopAlarmSound() {
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                
-                [0, 0.2, 0.4, 0.6].forEach(delay => {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                if (alarmInterval) clearInterval(alarmInterval);
+
+                const playBurst = () => {
                     const osc = audioCtx.createOscillator();
                     const gain = audioCtx.createGain();
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(600, audioCtx.currentTime + delay);
-                    osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + delay + 0.15);
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1400, audioCtx.currentTime + 0.2);
                     
-                    gain.gain.setValueAtTime(0.3, audioCtx.currentTime + delay);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + 0.15);
+                    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
                     
                     osc.connect(gain);
                     gain.connect(audioCtx.destination);
-                    osc.start(audioCtx.currentTime + delay);
-                    osc.stop(audioCtx.currentTime + delay + 0.15);
-                });
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.2);
+                };
+
+                playBurst();
+                alarmInterval = setInterval(playBurst, 400); // Repeats continuously non-stop until dismissed
             } catch (e) {
-                console.log("Audio play blocked by browser policy until interaction");
+                console.log("Audio play error:", e);
+            }
+        }
+
+        function stopAlarmSound() {
+            if (alarmInterval) {
+                clearInterval(alarmInterval);
+                alarmInterval = null;
             }
         }
 
         function snoozeActiveAlarm() {
+            stopAlarmSound();
             if (!activeRingingTaskId) return;
             
             tasks = tasks.map(t => {
@@ -574,6 +644,7 @@
         }
 
         function dismissActiveAlarm() {
+            stopAlarmSound();
             closeAlarmModal();
         }
 
@@ -612,7 +683,7 @@
             document.getElementById('dueDate').valueAsDate = new Date();
             
             triggerNotification('💾 SQLite Saved', `Task added: "${title}"`);
-            goToSlide(1); // Auto switch to Task Canvas slide
+            goToSlide(1);
         }
 
         function toggleTaskStatus(id) {
@@ -745,10 +816,16 @@
                 toast.classList.add('-translate-y-32', 'opacity-0');
             }, 3500);
 
+            appendLog(`${title}: ${message}`);
+        }
+
+        function appendLog(text) {
             const logStream = document.getElementById('notificationLog');
             const timeStamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            logStream.innerHTML += `<div>[${timeStamp}] ${title}: ${message}</div>`;
-            logStream.scrollTop = logStream.scrollHeight;
+            if (logStream) {
+                logStream.innerHTML += `<div>[${timeStamp}] ${text}</div>`;
+                logStream.scrollTop = logStream.scrollHeight;
+            }
         }
 
         // Horizontal Slide Navigation
@@ -757,7 +834,6 @@
             const wrapper = document.getElementById('sliderWrapper');
             wrapper.style.transform = `translateX(-${currentSlide * 100}vw)`;
 
-            // Update Nav Tab Styles
             for (let i = 0; i < totalSlides; i++) {
                 const tab = document.getElementById(`navSlide${i}`);
                 if (i === currentSlide) {
@@ -767,7 +843,6 @@
                 }
             }
 
-            // Arrow Opacity & Visibility
             document.getElementById('prevArrow').style.opacity = currentSlide === 0 ? '0.4' : '1';
             document.getElementById('prevArrow').style.pointerEvents = currentSlide === 0 ? 'none' : 'auto';
             document.getElementById('nextArrow').style.opacity = currentSlide === totalSlides - 1 ? '0.4' : '1';
@@ -782,7 +857,6 @@
             if (currentSlide > 0) goToSlide(currentSlide - 1);
         }
 
-        // Keyboard Arrow Key Navigation
         document.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
             if (e.key === 'ArrowRight') nextSlide();
