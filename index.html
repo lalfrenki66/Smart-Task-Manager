@@ -33,10 +33,9 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        /* Custom Doodle & Horizontal Slider Styles */
         body {
             font-family: 'Patrick Hand', cursive, sans-serif;
-            background-color: #FFFDF0; /* Sketchbook paper color */
+            background-color: #FFFDF0;
             background-image: radial-gradient(#E5D9C5 1.5px, transparent 1.5px);
             background-size: 24px 24px;
             color: #2C3E50;
@@ -55,7 +54,6 @@
             font-family: 'Sniglet', cursive, sans-serif;
         }
 
-        /* Doodle Box & Buttons */
         .doodle-box {
             border: 3px solid #2C3E50;
             border-radius: 18px 255px 15px 225px/255px 15px 225px 15px;
@@ -101,7 +99,6 @@
             border-color: #2C3E50;
         }
 
-        /* Horizontal Carousel Slider */
         .slider-wrapper {
             display: flex;
             width: 300vw;
@@ -117,7 +114,6 @@
             box-sizing: border-box;
         }
 
-        /* Custom Scrollbars */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -139,7 +135,6 @@
             border: 2px solid #2C3E50;
         }
 
-        /* Pulse Animation for Ringing Alarms */
         @keyframes doodle-pulse {
             0%, 100% { transform: scale(1) rotate(0deg); }
             25% { transform: scale(1.05) rotate(-2deg); }
@@ -159,7 +154,6 @@
         
         <!-- TOP DESKTOP WINDOW BAR & HORIZONTAL SLIDE NAV TABS -->
         <div class="bg-[#FFD166] border-b-4 border-[#2C3E50] p-2 px-4 flex flex-col sm:flex-row items-center justify-between gap-2 shrink-0 z-30">
-            <!-- App Details -->
             <div class="flex items-center space-x-2">
                 <div class="win-dot bg-[#FF6B6B]"></div>
                 <div class="win-dot bg-[#FFD166]"></div>
@@ -169,7 +163,6 @@
                 </span>
             </div>
 
-            <!-- Horizontal Slide Navigation Tabs -->
             <div class="flex items-center gap-2 bg-[#FFFDF0] p-1 rounded-full border-2 border-[#2C3E50] shadow-[2px_2px_0px_#2C3E50]">
                 <button onclick="goToSlide(0)" id="navSlide0" 
                     class="px-3 py-1 font-heading font-bold text-xs rounded-full transition-all bg-[#2C3E50] text-white">
@@ -185,7 +178,6 @@
                 </button>
             </div>
 
-            <!-- Background Engine Activation Button -->
             <div class="flex items-center space-x-2">
                 <button onclick="initBackgroundEngine()" class="bg-[#FF6B6B] hover:bg-red-600 text-white font-heading text-xs font-bold px-3 py-1.5 rounded-full border-2 border-[#2C3E50] shadow-[2px_2px_0px_#2C3E50] animate-pulse">
                     🔔 Enable Background Engine
@@ -193,7 +185,6 @@
             </div>
         </div>
 
-        <!-- FLOATING SIDE CAROUSEL ARROWS -->
         <button onclick="prevSlide()" id="prevArrow" 
             class="fixed left-6 top-1/2 -translate-y-1/2 z-40 w-12 h-12 bg-[#FFD166] text-[#2C3E50] doodle-btn rounded-full flex items-center justify-center text-xl font-extrabold opacity-40 pointer-events-none">
             ←
@@ -276,7 +267,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Enable Alarm Switch -->
                                     <div class="flex items-center justify-between bg-white p-3 rounded-xl border-2 border-[#2C3E50] shadow-[2px_2px_0px_#2C3E50]">
                                         <div class="flex items-center gap-2">
                                             <span class="text-xl">🔔</span>
@@ -318,7 +308,6 @@
                 <div class="slide-page flex items-center justify-center">
                     <div class="w-full max-w-5xl h-full bg-[#FFFDF0] doodle-box p-5 flex flex-col justify-between overflow-hidden">
                         <div class="flex flex-col h-full overflow-hidden">
-                            <!-- Header & Filter Bar -->
                             <div class="space-y-3 border-b-4 border-dashed border-[#2C3E50] pb-3 mb-3 shrink-0">
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                                     <div>
@@ -329,7 +318,6 @@
                                     </div>
 
                                     <div class="flex items-center gap-2">
-                                        <!-- Filter Controls -->
                                         <div class="flex items-center gap-1 bg-[#FFF9E6] p-1 rounded-xl border-2 border-[#2C3E50]">
                                             <button onclick="setFilter('All')" id="filterAll"
                                                 class="px-3 py-1 text-xs font-heading font-bold rounded-lg transition-all bg-[#2C3E50] text-white">
@@ -347,7 +335,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Search Input -->
                                 <div class="relative">
                                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-400"></i>
                                     <input type="text" id="searchInput" oninput="renderTasks()" placeholder="Search tasks..." 
@@ -355,10 +342,7 @@
                                 </div>
                             </div>
 
-                            <!-- Scrollable Task Grid -->
-                            <div id="taskList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto pr-1 flex-grow">
-                                <!-- Tasks dynamically populated -->
-                            </div>
+                            <div id="taskList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 overflow-y-auto pr-1 flex-grow"></div>
                         </div>
 
                         <div class="flex justify-between items-center text-xs font-heading text-gray-500 border-t-2 border-dashed border-[#2C3E50] pt-2 mt-2 shrink-0">
@@ -385,7 +369,6 @@
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <!-- Progress Card -->
                                 <div class="bg-white p-4 doodle-box flex flex-col justify-between">
                                     <h3 class="font-heading font-bold text-lg text-[#1D3557] mb-2">📈 Overall Completion</h3>
                                     <div class="flex items-center justify-between font-heading font-bold text-sm mb-1">
@@ -407,7 +390,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Push Notification Stream -->
                                 <div class="bg-[#1D3557] text-white p-4 doodle-box flex flex-col justify-between">
                                     <div>
                                         <div class="flex items-center justify-between border-b border-gray-600 pb-2 mb-2">
@@ -435,7 +417,6 @@
             </div>
         </div>
 
-        <!-- DESKTOP FOOTER STATUS BAR -->
         <div class="bg-[#1D3557] text-[#FFFDF0] px-4 py-1.5 border-t-4 border-[#2C3E50] text-xs font-heading flex justify-between items-center shrink-0 z-30">
             <span>💾 SQLite DB Status: <strong class="text-green-400">CONNECTED</strong> | Alarm Engine: <strong id="clockDisplay" class="text-yellow-300">00:00:00</strong></span>
             <span>Group 5 Desktop App</span>
@@ -470,7 +451,6 @@
         </div>
     </div>
 
-    <!-- SIMULATED TOAST NOTIFICATION -->
     <div id="notificationToast" 
         class="fixed top-16 right-6 bg-[#FFFDF0] doodle-box p-3 max-w-xs w-full shadow-2xl transition-all duration-300 transform -translate-y-32 opacity-0 z-50 pointer-events-none">
         <div class="flex items-start gap-3">
@@ -482,12 +462,10 @@
         </div>
     </div>
 
-    <!-- HIDDEN AUDIO ELEMENT FOR BACKGROUND LOCK -->
     <audio id="silentAudio" loop style="display:none;">
         <source src="https://actions.google.com/sounds/v1/ambiences/rain_heavy.ogg" type="audio/ogg">
     </audio>
 
-    <!-- SLIDE & APP INTERACTION JAVASCRIPT -->
     <script>
         document.getElementById('dueDate').valueAsDate = new Date();
         
@@ -508,56 +486,33 @@
         let currentFilter = 'All';
 
         renderTasks();
-
-        // Alarm Clock Tick Engine (Runs every second)
         setInterval(checkAlarmEngine, 1000);
 
-        // Auto-request notification permissions on page load
+        // Auto request permission on startup
         window.addEventListener('load', () => {
-            requestNotificationPermission();
-        });
-
-        // 1. REQUEST NOTIFICATION PERMISSION
-        async function requestNotificationPermission() {
-            if ("Notification" in window) {
-                const perm = await Notification.requestPermission();
-                if (perm === "granted") {
-                    appendLog("Notification Permission Granted!");
-                } else {
-                    appendLog("Notification Permission Denied.");
-                }
-            }
-        }
-
-        // 2. DETECT APP EXIT & SCREEN LOCK
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') {
-                triggerExitNotification();
+            if ("Notification" in window && Notification.permission !== "granted") {
+                Notification.requestPermission();
             }
         });
 
-        function triggerExitNotification() {
-            if (navigator.serviceWorker && navigator.serviceWorker.controller && Notification.permission === 'granted') {
-                navigator.serviceWorker.controller.postMessage({
-                    action: 'SHOW_NOTIFICATION',
-                    title: 'Doodle Task Manager ✏️',
-                    body: 'App running in background. Your scheduled alarms will ring automatically!'
-                });
-            }
-        }
-
-        // 3. INITIALIZE BACKGROUND ENGINE (Service Worker & Audio Unlock)
         async function initBackgroundEngine() {
             if ('serviceWorker' in navigator) {
                 try {
                     swRegistration = await navigator.serviceWorker.register('sw.js');
-                    appendLog("Service Worker Registered for background sync.");
+                    appendLog("Service Worker Registered.");
                 } catch (err) {
                     console.error("SW registration failed", err);
                 }
             }
 
-            await requestNotificationPermission();
+            if ("Notification" in window) {
+                const perm = await Notification.requestPermission();
+                if (perm === "granted") {
+                    appendLog("System Notifications Bar: ALLOWED");
+                } else {
+                    alert("Please allow notifications so reminders can hit your phone status bar!");
+                }
+            }
 
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -569,7 +524,7 @@
                     silentAudio.play().catch(e => console.log("Audio lock error:", e));
                 }
 
-                alert("Background Engine Activated! Alarms will ring non-stop even when switching apps.");
+                alert("Background Engine Activated! Alarms will push to your phone's notification bar.");
                 appendLog("Background Engine LOCKED & ACTIVE");
             } catch (e) {
                 alert("Tap anywhere on the screen first to enable permissions.");
@@ -582,7 +537,6 @@
             const timeStr = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             
             document.getElementById('clockDisplay').innerText = timeStr;
-
             const currentHoursMinutes = `${String(currentTime.getHours()).padStart(2, '0')}:${String(currentTime.getMinutes()).padStart(2, '0')}`;
 
             tasks.forEach(task => {
@@ -600,33 +554,33 @@
             saveToSQLiteStorage();
             renderTasks();
 
-            // Play non-stop looping alarm sound
+            // Play continuous web audio loop
             playNonStopAlarmSound();
 
-            // Trigger Push Notification via Service Worker (works when switching apps)
+            // PUSH NOTIFICATION TO PHONE NOTIFICATION BAR VIA SERVICE WORKER
             if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({
-                    action: 'SHOW_NOTIFICATION',
+                    action: 'TRIGGER_ALARM',
                     title: `⚠️ ALARM: ${task.title}`,
-                    body: `Your task is due now!`
+                    body: `Your scheduled task is due right now!`
                 });
             } else if ("Notification" in window && Notification.permission === "granted") {
+                // Fallback direct web notification
                 new Notification(`⚠️ ALARM: ${task.title}`, {
-                    body: `Your task is due now!`,
-                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23FFD166'/%3E%3C/svg%3E"
+                    body: `Your scheduled task is due right now!`,
+                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23FFD166'/%3E%3C/svg%3E",
+                    requireInteraction: true
                 });
             }
 
+            // Show In-App Alarm Modal
             document.getElementById('alarmModalTitle').innerText = task.title;
             document.getElementById('alarmModalTime').innerText = `⏰ Scheduled Warning: ${task.dueDate} at ${format12Hour(task.dueTime)}`;
-            
-            const modal = document.getElementById('alarmModal');
-            modal.classList.remove('opacity-0', 'pointer-events-none');
+            document.getElementById('alarmModal').classList.remove('opacity-0', 'pointer-events-none');
 
-            appendLog(`ALARM TRIGGERED: "${task.title}"`);
+            appendLog(`ALARM PUSHED TO STATUS BAR: "${task.title}"`);
         }
 
-        // NON-STOP INFINITE ALARM SOUND LOOP
         function playNonStopAlarmSound() {
             try {
                 if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -651,7 +605,7 @@
                 };
 
                 playBurst();
-                alarmInterval = setInterval(playBurst, 400); // Repeats continuously non-stop until dismissed
+                alarmInterval = setInterval(playBurst, 400);
             } catch (e) {
                 console.log("Audio play error:", e);
             }
@@ -682,7 +636,7 @@
             saveToSQLiteStorage();
             closeAlarmModal();
             renderTasks();
-            triggerNotification('💤 Alarm Snoozed', 'Reminding you again in 5 minutes!');
+            triggerToast('💤 Alarm Snoozed', 'Reminding you again in 5 minutes!');
         }
 
         function dismissActiveAlarm() {
@@ -724,7 +678,7 @@
             document.getElementById('taskForm').reset();
             document.getElementById('dueDate').valueAsDate = new Date();
             
-            triggerNotification('💾 SQLite Saved', `Task added: "${title}"`);
+            triggerToast('💾 SQLite Saved', `Task added: "${title}"`);
             goToSlide(1);
         }
 
@@ -845,7 +799,7 @@
             localStorage.setItem('group5_sqlite_tasks', JSON.stringify(tasks));
         }
 
-        function triggerNotification(title, message) {
+        function triggerToast(title, message) {
             const toast = document.getElementById('notificationToast');
             document.getElementById('notifTitle').innerText = title;
             document.getElementById('notifMessage').innerText = message;
@@ -870,7 +824,6 @@
             }
         }
 
-        // Horizontal Slide Navigation
         function goToSlide(index) {
             currentSlide = index;
             const wrapper = document.getElementById('sliderWrapper');
@@ -891,13 +844,8 @@
             document.getElementById('nextArrow').style.pointerEvents = currentSlide === totalSlides - 1 ? 'none' : 'auto';
         }
 
-        function nextSlide() {
-            if (currentSlide < totalSlides - 1) goToSlide(currentSlide + 1);
-        }
-
-        function prevSlide() {
-            if (currentSlide > 0) goToSlide(currentSlide - 1);
-        }
+        function nextSlide() { if (currentSlide < totalSlides - 1) goToSlide(currentSlide + 1); }
+        function prevSlide() { if (currentSlide > 0) goToSlide(currentSlide - 1); }
 
         document.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
