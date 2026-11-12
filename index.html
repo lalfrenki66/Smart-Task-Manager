@@ -102,7 +102,7 @@
         </div>
 
         <!-- Desktop Quick Add Button -->
-        <button onclick="switchTab('tab-add')" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-tealAccent-600 text-white text-xs font-semibold shadow-md hover:opacity-90 transition-all">
+        <button onclick="switchTab('tab-add')" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-tealAccent-600 text-white text-xs font-semibold shadow-md hover:opacity-90 transition-all cursor-pointer">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
@@ -111,11 +111,11 @@
       </div>
     </header>
 
-    <!-- Navigation Bar (Desktop Header Tabs & Mobile Bottom Bar) -->
+    <!-- Navigation Bar -->
     <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 sm:relative sm:border-t-0 sm:bg-transparent sm:dark:bg-transparent sm:backdrop-blur-none sm:mb-6">
       <div class="max-w-5xl mx-auto px-2 sm:px-0 flex justify-around sm:justify-start sm:gap-2">
         
-        <button data-tab="tab-tasks" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition-all text-brand-600 dark:text-brand-400 bg-brand-500/10">
+        <button data-tab="tab-tasks" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition-all text-brand-600 dark:text-brand-400 bg-brand-500/10 cursor-pointer">
           <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
@@ -123,14 +123,14 @@
           <span id="tab-badge-tasks" class="ml-1 px-1.5 py-0.2 rounded-full bg-brand-500 text-white text-[10px]">0</span>
         </button>
 
-        <button data-tab="tab-add" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+        <button data-tab="tab-add" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
           <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
           <span>Add Task</span>
         </button>
 
-        <button data-tab="tab-alarms" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+        <button data-tab="tab-alarms" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
           <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
           </svg>
@@ -138,14 +138,14 @@
           <span id="tab-badge-alarms" class="ml-1 px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] hidden">0</span>
         </button>
 
-        <button data-tab="tab-analytics" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+        <button data-tab="tab-analytics" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
           <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
           <span>Analytics</span>
         </button>
 
-        <button data-tab="tab-settings" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+        <button data-tab="tab-settings" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
           <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -161,7 +161,6 @@
 
       <!-- VIEW 1: TASKS LIST TAB -->
       <section id="tab-tasks" class="tab-view space-y-4">
-        <!-- Search and Filter Bar -->
         <div class="glass p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row gap-3 items-center justify-between shadow-sm">
           <div class="relative w-full sm:w-64">
             <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -171,24 +170,23 @@
           </div>
 
           <div class="flex items-center space-x-1 w-full sm:w-auto bg-slate-200/60 dark:bg-slate-900/80 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800">
-            <button data-filter="all" class="filter-tab px-3 py-1 rounded-lg text-xs font-semibold transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm">
+            <button data-filter="all" class="filter-tab px-3 py-1 rounded-lg text-xs font-semibold transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm cursor-pointer">
               All
             </button>
-            <button data-filter="pending" class="filter-tab px-3 py-1 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+            <button data-filter="pending" class="filter-tab px-3 py-1 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
               Active
             </button>
-            <button data-filter="completed" class="filter-tab px-3 py-1 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+            <button data-filter="completed" class="filter-tab px-3 py-1 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
               Done
             </button>
           </div>
         </div>
 
-        <!-- Category & Priority Sub-Filters -->
         <div class="flex flex-wrap items-center justify-between px-1 text-xs text-slate-500 dark:text-slate-400 gap-2">
           <div class="flex items-center space-x-3">
             <div class="flex items-center space-x-1">
               <span>Priority:</span>
-              <select id="priority-filter" class="bg-transparent font-semibold border-b border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none pb-0.5">
+              <select id="priority-filter" class="bg-transparent font-semibold border-b border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none pb-0.5 cursor-pointer">
                 <option value="all">All</option>
                 <option value="high">🔴 High</option>
                 <option value="medium">🟡 Medium</option>
@@ -197,13 +195,13 @@
             </div>
             <div class="flex items-center space-x-1">
               <span>Category:</span>
-              <select id="category-filter" class="bg-transparent font-semibold border-b border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none pb-0.5">
+              <select id="category-filter" class="bg-transparent font-semibold border-b border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none pb-0.5 cursor-pointer">
                 <option value="all">All Tags</option>
               </select>
             </div>
           </div>
           
-          <button id="clear-completed-btn" class="hover:text-rose-500 font-semibold transition-colors flex items-center gap-1">
+          <button id="clear-completed-btn" class="hover:text-rose-500 font-semibold transition-colors flex items-center gap-1 cursor-pointer">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -211,12 +209,8 @@
           </button>
         </div>
 
-        <!-- Dynamic Task List Container -->
-        <div id="task-list" class="space-y-3">
-          <!-- Tasks render here -->
-        </div>
+        <div id="task-list" class="space-y-3"></div>
 
-        <!-- Empty State -->
         <div id="empty-state" class="hidden flex-col items-center justify-center py-16 text-center text-slate-400">
           <div class="w-16 h-16 rounded-3xl bg-slate-200/50 dark:bg-slate-800/50 flex items-center justify-center mb-3 text-slate-400">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,7 +232,7 @@
               </svg>
               Create New Task
             </h2>
-            <button id="cancel-edit-btn" class="text-xs font-semibold text-rose-500 hover:underline hidden">Cancel Edit</button>
+            <button id="cancel-edit-btn" class="text-xs font-semibold text-rose-500 hover:underline hidden cursor-pointer">Cancel Edit</button>
           </div>
 
           <form id="task-form" class="space-y-4">
@@ -257,7 +251,7 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Priority</label>
-                <select id="task-priority" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-xs font-semibold shadow-sm">
+                <select id="task-priority" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-xs font-semibold shadow-sm cursor-pointer">
                   <option value="low">🟢 Low</option>
                   <option value="medium" selected>🟡 Medium</option>
                   <option value="high">🔴 High</option>
@@ -278,15 +272,15 @@
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Due Date</label>
-                <input type="date" id="task-date" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-xs font-medium shadow-sm" />
+                <input type="date" id="task-date" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-xs font-medium shadow-sm cursor-pointer" />
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Alarm Time</label>
-                <input type="time" id="task-time" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-xs font-medium shadow-sm" />
+                <input type="time" id="task-time" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-xs font-medium shadow-sm cursor-pointer" />
               </div>
             </div>
 
-            <button type="submit" id="submit-btn" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-tealAccent-600 hover:from-brand-500 hover:to-tealAccent-500 text-white font-semibold text-xs uppercase tracking-wider shadow-lg shadow-brand-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-4">
+            <button type="submit" id="submit-btn" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-tealAccent-600 hover:from-brand-500 hover:to-tealAccent-500 text-white font-semibold text-xs uppercase tracking-wider shadow-lg shadow-brand-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
@@ -298,8 +292,6 @@
 
       <!-- VIEW 3: ALARMS & NOTIFICATIONS TAB -->
       <section id="tab-alarms" class="tab-view space-y-6 hidden max-w-3xl mx-auto">
-        
-        <!-- Notification Permission Banner -->
         <div class="glass p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between gap-4">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
@@ -312,40 +304,35 @@
               <p id="notif-status-desc" class="text-xs text-slate-500 dark:text-slate-400">Click to enable background native OS alerts.</p>
             </div>
           </div>
-          <button id="notif-perm-btn" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md transition-all">
+          <button id="notif-perm-btn" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md transition-all cursor-pointer">
             Enable Alerts
           </button>
         </div>
 
-        <!-- Notification Sound & Audio Engine Controls -->
         <div class="glass p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 space-y-4">
           <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
             <svg class="w-4 h-4 text-tealAccent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
             </svg>
-            Web Audio Alarm Sound Engine
+            Web Audio Alarm Sound Engine & Instant Test
           </h3>
           <p class="text-xs text-slate-500 dark:text-slate-400">
-            Uses browser Web Audio API to synthesize alarm tones locally without requiring internet or external MP3 files.
+            Test the alarm sound or force an instant on-screen alarm popup right now to verify how it looks and works.
           </p>
-          <div class="flex items-center gap-3 pt-2">
-            <button id="test-audio-btn" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-semibold transition-all">
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <button id="test-audio-btn" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-semibold transition-all cursor-pointer">
               🔔 Test Alarm Tone
             </button>
-            <button id="test-sw-notif-btn" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-semibold transition-all">
-              📱 Test Push Popup
+            <button id="test-popup-btn" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md transition-all cursor-pointer">
+              🚨 Test Screen Popup Now
             </button>
           </div>
         </div>
 
-        <!-- Active Timed Alarms Schedule -->
         <div class="glass p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 space-y-3">
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">Scheduled Task Alarms</h3>
-          <div id="scheduled-alarms-list" class="space-y-2">
-            <!-- Scheduled Alarm Items -->
-          </div>
+          <div id="scheduled-alarms-list" class="space-y-2"></div>
         </div>
-
       </section>
 
       <!-- VIEW 4: ANALYTICS TAB -->
@@ -369,7 +356,6 @@
           </div>
         </div>
 
-        <!-- Completion Progress Bar Card -->
         <div class="glass p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 space-y-3">
           <div class="flex justify-between items-center">
             <h3 class="text-sm font-bold text-slate-900 dark:text-white">Overall Completion Progress</h3>
@@ -380,7 +366,6 @@
           </div>
         </div>
 
-        <!-- Priority Breakdown -->
         <div class="glass p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 space-y-4">
           <h3 class="text-sm font-bold text-slate-900 dark:text-white">Priority Distribution</h3>
           <div class="space-y-3">
@@ -418,30 +403,27 @@
       <!-- VIEW 5: SETTINGS TAB -->
       <section id="tab-settings" class="tab-view space-y-4 hidden max-w-3xl mx-auto">
         <div class="glass p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 space-y-6">
-          
-          <!-- Appearance Switch -->
           <div class="flex items-center justify-between">
             <div>
               <h3 class="text-sm font-bold text-slate-900 dark:text-white">App Theme</h3>
               <p class="text-xs text-slate-500 dark:text-slate-400">Toggle between Dark Mode and Light Mode</p>
             </div>
-            <button id="settings-theme-btn" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold">
+            <button id="settings-theme-btn" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold cursor-pointer">
               Toggle Dark Theme
             </button>
           </div>
 
           <hr class="border-slate-200 dark:border-slate-800" />
 
-          <!-- JSON Export / Import -->
           <div>
             <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">Backup & Restore</h3>
             <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Save tasks to a JSON file or restore from a backup.</p>
             <div class="flex items-center gap-3">
-              <button id="export-btn" class="px-4 py-2 rounded-xl bg-tealAccent-600 text-white text-xs font-semibold shadow-md hover:bg-tealAccent-500 transition-all flex items-center gap-1.5">
+              <button id="export-btn" class="px-4 py-2 rounded-xl bg-tealAccent-600 text-white text-xs font-semibold shadow-md hover:bg-tealAccent-500 transition-all flex items-center gap-1.5 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 Export JSON
               </button>
-              <button id="import-btn" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold shadow-md hover:bg-indigo-500 transition-all flex items-center gap-1.5">
+              <button id="import-btn" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold shadow-md hover:bg-indigo-500 transition-all flex items-center gap-1.5 cursor-pointer">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                 Restore JSON
               </button>
@@ -451,7 +433,6 @@
 
           <hr class="border-slate-200 dark:border-slate-800" />
 
-          <!-- Service Worker & Storage Info -->
           <div>
             <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">Offline Service Worker Status</h3>
             <p id="sw-info-text" class="text-xs font-mono text-emerald-500 bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
@@ -461,20 +442,18 @@
 
           <hr class="border-slate-200 dark:border-slate-800" />
 
-          <!-- Clear All Storage -->
           <div>
             <h3 class="text-sm font-bold text-rose-500 mb-1">Danger Zone</h3>
-            <button id="clear-all-data-btn" class="px-4 py-2 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 text-xs font-semibold border border-rose-500/20 transition-all">
+            <button id="clear-all-data-btn" class="px-4 py-2 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 text-xs font-semibold border border-rose-500/20 transition-all cursor-pointer">
               Clear All IndexedDB Data
             </button>
           </div>
-
         </div>
       </section>
 
     </main>
 
-    <!-- Forced On-Screen Alarm Popup Modal (Always Visible on Trigger) -->
+    <!-- Center-Screen Alarm Popup Modal -->
     <div id="alarm-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
       <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl text-center transform scale-100 transition-transform">
         <div class="w-16 h-16 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto mb-4 animate-bounce">
@@ -523,65 +502,11 @@
     const manifestBlob = new Blob([JSON.stringify(manifestJSON)], { type: 'application/json' });
     document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(manifestBlob));
 
-    // --- 2. SERVICE WORKER FOR NOTIFICATION BAR ---
-    let swRegistration = null;
-
+    // --- 2. REGISTER STANDALONE sw.js FILE ---
     if ('serviceWorker' in navigator) {
-      const swCode = `
-        const CACHE_NAME = 'doodle-task-offline-v6';
-        const ASSETS = [
-          './',
-          'https://cdn.tailwindcss.com',
-          'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap'
-        ];
-
-        self.addEventListener('install', (e) => {
-          e.waitUntil(
-            caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
-          );
-        });
-
-        self.addEventListener('activate', (e) => {
-          e.waitUntil(
-            caches.keys().then((keys) => {
-              return Promise.all(
-                keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k))
-              );
-            }).then(() => self.clients.claim())
-          );
-        });
-
-        self.addEventListener('fetch', (e) => {
-          e.respondWith(
-            caches.match(e.request).then((cachedResponse) => {
-              if (cachedResponse) return cachedResponse;
-              return fetch(e.request).then((networkResponse) => {
-                if (e.request.method === 'GET' && e.request.url.startsWith('http')) {
-                  const resClone = networkResponse.clone();
-                  caches.open(CACHE_NAME).then((cache) => cache.put(e.request, resClone));
-                }
-                return networkResponse;
-              }).catch(() => caches.match('./'));
-            })
-          );
-        });
-
-        self.addEventListener('notificationclick', (event) => {
-          event.notification.close();
-          event.waitUntil(
-            clients.matchAll({ type: 'window' }).then((clientList) => {
-              for (const client of clientList) {
-                if (client.url && 'focus' in client) return client.focus();
-              }
-              if (clients.openWindow) return clients.openWindow('./');
-            })
-          );
-        });
-      `;
-      const swBlob = new Blob([swCode], { type: 'application/javascript' });
-      navigator.serviceWorker.register(URL.createObjectURL(swBlob))
-        .then(reg => { swRegistration = reg; })
-        .catch(err => console.log('SW Registration Note:', err));
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Standalone Service Worker Registered'))
+        .catch(err => console.log('SW Reg Error:', err));
     }
 
     // --- 3. INDEXEDDB STORAGE ENGINE ---
@@ -757,7 +682,7 @@
     const notifPermBtn = document.getElementById('notif-perm-btn');
     const notifStatusDesc = document.getElementById('notif-status-desc');
     const testAudioBtn = document.getElementById('test-audio-btn');
-    const testSwNotifBtn = document.getElementById('test-sw-notif-btn');
+    const testPopupBtn = document.getElementById('test-popup-btn');
     const scheduledAlarmsList = document.getElementById('scheduled-alarms-list');
 
     const alarmModal = document.getElementById('alarm-modal');
@@ -771,7 +696,7 @@
     function switchTab(tabId) {
       document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
       document.querySelectorAll('.nav-tab').forEach(btn => {
-        btn.className = 'nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all';
+        btn.className = 'nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer';
       });
 
       const targetView = document.getElementById(tabId);
@@ -779,7 +704,7 @@
 
       const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
       if (activeBtn) {
-        activeBtn.className = 'nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition-all text-brand-600 dark:text-brand-400 bg-brand-500/10';
+        activeBtn.className = 'nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition-all text-brand-600 dark:text-brand-400 bg-brand-500/10 cursor-pointer';
       }
     }
 
@@ -854,26 +779,15 @@
       showToast('Playing Web Audio Synthesizer Chime');
     });
 
-    testSwNotifBtn.addEventListener('click', () => {
-      triggerSystemNotification('Test Alert', 'This is how native background alerts will appear in your notification bar!');
-      showToast('Dispatched Notification Bar Alert');
+    testPopupBtn.addEventListener('click', () => {
+      triggerAlarm({
+        id: 'test_popup',
+        title: '🚨 Test Task Reminder',
+        description: 'This is a test popup to verify turning off and managing alarms.',
+        priority: 'High',
+        completed: false
+      });
     });
-
-    function triggerSystemNotification(title, body) {
-      if ('Notification' in window && Notification.permission === 'granted') {
-        if (swRegistration && swRegistration.showNotification) {
-          swRegistration.showNotification(`⏰ ${title}`, {
-            body: body,
-            icon: manifestJSON.icons[0].src,
-            badge: manifestJSON.icons[0].src,
-            vibrate: [200, 100, 200],
-            requireInteraction: true
-          });
-        } else {
-          new Notification(`⏰ ${title}`, { body: body });
-        }
-      }
-    }
 
     function checkAlarms() {
       const now = new Date();
@@ -893,16 +807,25 @@
 
     function triggerAlarm(task) {
       task.alarmFired = true;
-      db.saveTask(task);
+      if (task.id !== 'test_popup') {
+        db.saveTask(task);
+      }
       currentActiveAlarmTask = task;
 
-      // 1. Play Audio Chime Loops
+      // 1. Play Web Audio Chime Loops
       synthesizer.startAlarm();
 
-      // 2. Dispatch Notification Bar Alert
-      triggerSystemNotification(task.title, task.description || 'Your scheduled task reminder is due!');
+      // 2. Send message to standalone sw.js to dispatch Notification Bar alert
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          action: 'TRIGGER_ALARM',
+          priority: task.priority ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) : 'Medium',
+          title: task.title,
+          body: task.description || 'Your scheduled task reminder is due!'
+        });
+      }
 
-      // 3. Force Modal Popup Visible on Screen
+      // 3. Force Center-Screen Modal Popup Visible
       alarmTaskTitle.textContent = task.title;
       alarmTaskDesc.textContent = task.description || 'No additional notes provided.';
       alarmModal.classList.remove('hidden');
@@ -910,7 +833,6 @@
       render();
     }
 
-    // Turn Off / Dismiss Reminder Button Handler
     dismissAlarmBtn.addEventListener('click', () => {
       synthesizer.stopAlarm();
       alarmModal.classList.add('hidden');
@@ -918,15 +840,14 @@
       showToast('Reminder Turned Off');
     });
 
-    // Mark as Done & Turn Off Reminder Button Handler
     completeAlarmBtn.addEventListener('click', async () => {
       synthesizer.stopAlarm();
-      if (currentActiveAlarmTask) {
+      if (currentActiveAlarmTask && currentActiveAlarmTask.id !== 'test_popup') {
         currentActiveAlarmTask.completed = true;
         await db.saveTask(currentActiveAlarmTask);
-        currentActiveAlarmTask = null;
       }
       alarmModal.classList.add('hidden');
+      currentActiveAlarmTask = null;
       showToast('Task Completed & Reminder Turned Off');
       render();
     });
@@ -1105,9 +1026,9 @@
     document.querySelectorAll('.filter-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.filter-tab').forEach(t => {
-          t.className = 'filter-tab px-3 py-1 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all';
+          t.className = 'filter-tab px-3 py-1 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer';
         });
-        tab.className = 'filter-tab px-3 py-1 rounded-lg text-xs font-semibold transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm';
+        tab.className = 'filter-tab px-3 py-1 rounded-lg text-xs font-semibold transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm cursor-pointer';
         currentFilter = tab.dataset.filter;
         render();
       });
@@ -1227,7 +1148,7 @@
           }`;
 
           card.innerHTML = `
-            <button onclick="toggleComplete('${task.id}')" class="mt-0.5 w-5 h-5 rounded-lg border flex items-center justify-center transition-all ${
+            <button onclick="toggleComplete('${task.id}')" class="mt-0.5 w-5 h-5 rounded-lg border flex items-center justify-center transition-all cursor-pointer ${
               task.completed 
                 ? 'bg-brand-600 border-brand-600 text-white' 
                 : 'border-slate-300 dark:border-slate-700 hover:border-brand-500'
@@ -1259,12 +1180,12 @@
             </div>
 
             <div class="flex items-center space-x-1">
-              <button onclick="editTask('${task.id}')" class="p-1.5 text-slate-400 hover:text-brand-500 transition-colors" title="Edit">
+              <button onclick="editTask('${task.id}')" class="p-1.5 text-slate-400 hover:text-brand-500 transition-colors cursor-pointer" title="Edit">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
               </button>
-              <button onclick="deleteTask('${task.id}')" class="p-1.5 text-slate-400 hover:text-rose-500 transition-colors" title="Delete">
+              <button onclick="deleteTask('${task.id}')" class="p-1.5 text-slate-400 hover:text-rose-500 transition-colors cursor-pointer" title="Delete">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
@@ -1277,7 +1198,7 @@
     }
 
     function escapeHtml(str) {
-      if (!str) return '';
+      if (!str) return '&#8203;';
       return str.replace(/[&<>"']/g, function(m) {
         return {
           '&': '&amp;',
