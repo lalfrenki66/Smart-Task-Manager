@@ -474,9 +474,9 @@
 
     </main>
 
-    <!-- Custom Web Audio Synthesizer Alarm Modal with Turn Off Button -->
-    <div id="alarm-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-      <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl text-center">
+    <!-- Forced On-Screen Alarm Popup Modal (Always Visible on Trigger) -->
+    <div id="alarm-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl text-center transform scale-100 transition-transform">
         <div class="w-16 h-16 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto mb-4 animate-bounce">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -486,10 +486,10 @@
         <p id="alarm-task-title" class="text-sm font-semibold text-brand-600 dark:text-brand-400 mt-2">Task Title</p>
         <p id="alarm-task-desc" class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-h-24 overflow-y-auto">Task Details...</p>
         <div class="mt-6 flex flex-col gap-2">
-          <button id="dismiss-alarm-btn" class="w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs uppercase tracking-wider shadow-lg shadow-rose-500/30 transition-all">
+          <button id="dismiss-alarm-btn" class="w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs uppercase tracking-wider shadow-lg shadow-rose-500/30 transition-all cursor-pointer">
             Turn Off Reminder
           </button>
-          <button id="complete-alarm-btn" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs uppercase tracking-wider shadow-md transition-all">
+          <button id="complete-alarm-btn" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer">
             Mark as Done & Turn Off
           </button>
         </div>
@@ -523,12 +523,12 @@
     const manifestBlob = new Blob([JSON.stringify(manifestJSON)], { type: 'application/json' });
     document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(manifestBlob));
 
-    // --- 2. ENHANCED SERVICE WORKER FOR NOTIFICATION BAR ---
+    // --- 2. SERVICE WORKER FOR NOTIFICATION BAR ---
     let swRegistration = null;
 
     if ('serviceWorker' in navigator) {
       const swCode = `
-        const CACHE_NAME = 'doodle-task-offline-v5';
+        const CACHE_NAME = 'doodle-task-offline-v6';
         const ASSETS = [
           './',
           'https://cdn.tailwindcss.com',
@@ -566,7 +566,6 @@
           );
         });
 
-        // Click handler for notifications in the notification bar
         self.addEventListener('notificationclick', (event) => {
           event.notification.close();
           event.waitUntil(
@@ -820,12 +819,12 @@
         connectionBadge.className = 'px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20';
         connectionText.textContent = '🟢 Online';
       } else {
-        connectionBadge.className = 'px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-emerald-500/20';
+        connectionBadge.className = 'px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20';
         connectionText.textContent = '⚡ Offline';
       }
     }
 
-    // --- 8. DUAL NOTIFICATION ENGINE SYSTEM ---
+    // --- 8. DUAL NOTIFICATION & POPUP ENGINE ---
     function updateNotificationUI() {
       if ('Notification' in window) {
         if (Notification.permission === 'granted') {
@@ -897,13 +896,13 @@
       db.saveTask(task);
       currentActiveAlarmTask = task;
 
-      // 1. Play Audio Chime
+      // 1. Play Audio Chime Loops
       synthesizer.startAlarm();
 
-      // 2. Push to System Notification Bar / Shade
+      // 2. Dispatch Notification Bar Alert
       triggerSystemNotification(task.title, task.description || 'Your scheduled task reminder is due!');
 
-      // 3. Display In-App Screen Popup Modal
+      // 3. Force Modal Popup Visible on Screen
       alarmTaskTitle.textContent = task.title;
       alarmTaskDesc.textContent = task.description || 'No additional notes provided.';
       alarmModal.classList.remove('hidden');
@@ -911,7 +910,7 @@
       render();
     }
 
-    // Turn Off / Dismiss Reminder
+    // Turn Off / Dismiss Reminder Button Handler
     dismissAlarmBtn.addEventListener('click', () => {
       synthesizer.stopAlarm();
       alarmModal.classList.add('hidden');
@@ -919,7 +918,7 @@
       showToast('Reminder Turned Off');
     });
 
-    // Mark as Done & Turn Off Reminder
+    // Mark as Done & Turn Off Reminder Button Handler
     completeAlarmBtn.addEventListener('click', async () => {
       synthesizer.stopAlarm();
       if (currentActiveAlarmTask) {
