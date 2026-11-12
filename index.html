@@ -1,83 +1,1225 @@
-// sw.js - Standalone Service Worker with Background Alarm Scheduling & Lock-Screen Support
-self.addEventListener('install', (event) => {
-    self.skipWaiting();
-});
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doodle Smart Task Manager PWA</title>
 
-self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
-});
+  <!-- PWA Manifest -->
+  <link rel="manifest" id="manifest-placeholder" />
 
-self.addEventListener('message', (event) => {
-    if (!event.data) return;
-
-    // Immediate Trigger (When app is open)
-    if (event.data.action === 'TRIGGER_ALARM') {
-        showSystemAlarm(event.data.title, event.data.body, event.data.priority);
-    }
-
-    // Background Scheduled Trigger (When leaving app / phone sleeps)
-    if (event.data.action === 'SCHEDULE_ALARM' && event.data.timestamp) {
-        scheduleBackgroundAlarm(event.data);
-    }
-});
-
-function showSystemAlarm(title, body, priority = 'High') {
-    let vibratePattern = [500, 200, 500, 200, 500];
-    if (priority === 'Medium') vibratePattern = [300, 100, 300];
-    if (priority === 'Low') vibratePattern = [100, 50, 100];
-
-    const options = {
-        body: body || "Your task is due now!",
-        icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23FFD166'/%3E%3C/svg%3E",
-        badge: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='100' fill='%23FFD166'/%3E%3C/svg%3E",
-        vibrate: vibratePattern,
-        tag: 'task-alarm-' + Date.now(),
-        requireInteraction: true,
-        renotify: true,
-        silent: false,
-        actions: [
-            { action: 'open', title: '📂 Open & Stop Alarm' },
-            { action: 'dismiss', title: '❌ Dismiss' }
-        ]
-    };
-
-    return self.registration.showNotification(title || "⚠️ ALARM DUE!", options);
-}
-
-function scheduleBackgroundAlarm(data) {
-    // Uses Notification Triggers API (TimestampTrigger) when supported by mobile browser
-    if ('showTrigger' in Notification.prototype && data.timestamp > Date.now()) {
-        self.registration.showNotification(data.title || "⚠️ ALARM DUE!", {
-            body: data.body || "Scheduled reminder",
-            tag: 'scheduled-' + data.id,
-            showTrigger: new TimestampTrigger(data.timestamp),
-            vibrate: [500, 200, 500, 200, 500],
-            requireInteraction: true,
-            silent: false,
-            actions: [
-                { action: 'open', title: '📂 Open & Stop Alarm' },
-                { action: 'dismiss', title: '❌ Dismiss' }
-            ]
-        });
-    }
-}
-
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    if (event.action === 'dismiss') return;
-
-    // Focuses app window and commands index.html to force-open center modal popup
-    event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            if (clientList.length > 0) {
-                clientList[0].postMessage({ 
-                    action: 'OPEN_MODAL_FROM_NOTI', 
-                    title: event.notification.title, 
-                    body: event.notification.body 
-                });
-                return clientList[0].focus();
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            tealAccent: {
+              400: '#2dd4bf',
+              500: '#14b8a6',
+              600: '#0d9488',
             }
-            return clients.openWindow('./');
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .glass {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .dark .glass {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.3);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(156, 163, 175, 0.5);
+    }
+  </style>
+</head>
+
+<body class="h-full bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 antialiased transition-colors duration-300">
+
+  <div class="min-h-screen flex flex-col max-w-5xl mx-auto px-4 sm:px-6 pb-24 sm:pb-12">
+    
+    <!-- Top Header -->
+    <header class="py-4 flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800/80 mb-4">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-tealAccent-500 flex items-center justify-center shadow-lg shadow-brand-500/25 text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-brand-600 via-indigo-600 to-tealAccent-500 bg-clip-text text-transparent">
+            Doodle Smart
+          </h1>
+          <p class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Task Manager PWA</p>
+        </div>
+      </div>
+
+      <!-- Header Desktop Nav & Online Status -->
+      <div class="flex items-center space-x-2">
+        <div id="connection-badge" class="px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="connection-text">Online</span>
+        </div>
+
+        <button onclick="switchTab('tab-add')" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-tealAccent-600 text-white text-xs font-semibold shadow-md hover:opacity-90 transition-all cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          New Task
+        </button>
+      </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 sm:relative sm:border-t-0 sm:bg-transparent sm:dark:bg-transparent sm:backdrop-blur-none sm:mb-6">
+      <div class="max-w-5xl mx-auto px-2 sm:px-0 flex justify-around sm:justify-start sm:gap-2">
+        
+        <button data-tab="tab-tasks" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition-all text-brand-600 dark:text-brand-400 bg-brand-500/10 cursor-pointer">
+          <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <span>Tasks</span>
+          <span id="tab-badge-tasks" class="ml-1 px-1.5 py-0.2 rounded-full bg-brand-500 text-white text-[10px]">0</span>
+        </button>
+
+        <button data-tab="tab-add" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
+          <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <span>Add Task</span>
+        </button>
+
+        <button data-tab="tab-alarms" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
+          <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          <span>Alarms</span>
+          <span id="tab-badge-alarms" class="ml-1 px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] hidden">0</span>
+        </button>
+
+        <button data-tab="tab-analytics" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
+          <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+          <span>Analytics</span>
+        </button>
+
+        <button data-tab="tab-settings" class="nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
+          <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span>Settings</span>
+        </button>
+
+      </div>
+    </nav>
+
+    <!-- Main Views Container -->
+    <main class="flex-1">
+
+      <!-- VIEW 1: TASKS LIST TAB -->
+      <section id="tab-tasks" class="tab-view space-y-4">
+        <div class="glass p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row gap-3 items-center justify-between shadow-sm">
+          <div class="relative w-full sm:w-64">
+            <svg class="w-4 h-4 absolute left-3 top-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input type="text" id="search-input" placeholder="Search tasks or categories..." class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all placeholder-slate-400 shadow-sm" />
+          </div>
+
+          <div class="flex items-center space-x-1 w-full sm:w-auto bg-slate-200/60 dark:bg-slate-900/80 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800">
+            <button data-filter="all" class="filter-tab px-3 py-1 rounded-lg text-xs font-semibold transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm cursor-pointer">
+              All
+            </button>
+            <button data-filter="pending" class="filter-tab px-3 py-1 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
+              Active
+            </button>
+            <button data-filter="completed" class="filter-tab px-3 py-1 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer">
+              Done
+            </button>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between px-1 text-xs text-slate-500 dark:text-slate-400 gap-2">
+          <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-1">
+              <span>Priority:</span>
+              <select id="priority-filter" class="bg-transparent font-semibold border-b border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none pb-0.5 cursor-pointer">
+                <option value="all">All</option>
+                <option value="high">🔴 High</option>
+                <option value="medium">🟡 Medium</option>
+                <option value="low">🟢 Low</option>
+              </select>
+            </div>
+            <div class="flex items-center space-x-1">
+              <span>Category:</span>
+              <select id="category-filter" class="bg-transparent font-semibold border-b border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none pb-0.5 cursor-pointer">
+                <option value="all">All Tags</option>
+              </select>
+            </div>
+          </div>
+          
+          <button id="clear-completed-btn" class="hover:text-rose-500 font-semibold transition-colors flex items-center gap-1 cursor-pointer">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Clear Completed
+          </button>
+        </div>
+
+        <div id="task-list" class="space-y-3"></div>
+
+        <div id="empty-state" class="hidden flex-col items-center justify-center py-16 text-center text-slate-400">
+          <div class="w-16 h-16 rounded-3xl bg-slate-200/50 dark:bg-slate-800/50 flex items-center justify-center mb-3 text-slate-400">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <p class="font-bold text-slate-600 dark:text-slate-300">No tasks found</p>
+          <p class="text-xs text-slate-400 mt-1">Add a new task to get started.</p>
+        </div>
+      </section>
+
+      <!-- VIEW 2: ADD / EDIT TASK TAB -->
+      <section id="tab-add" class="tab-view space-y-4 hidden">
+        <div class="glass rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800/80 shadow-xl max-w-2xl mx-auto">
+          <div class="flex items-center justify-between mb-4">
+            <h2 id="form-title" class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Create New Task
+            </h2>
+            <button id="cancel-edit-btn" class="text-xs font-semibold text-rose-500 hover:underline hidden cursor-pointer">Cancel Edit</button>
+          </div>
+
+          <form id="task-form" class="space-y-4">
+            <input type="hidden" id="task-id" />
+            
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Task Title *</label>
+              <input type="text" id="task-title" required placeholder="What needs to be done?" class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all text-sm placeholder-slate-400 shadow-sm" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Description / Notes</label>
+              <textarea id="task-desc" rows="3" placeholder="Add extra context, steps, or checklist items..." class="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all text-sm placeholder-slate-400 shadow-sm"></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Priority</label>
+                <select id="task-priority" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-xs font-semibold shadow-sm cursor-pointer">
+                  <option value="low">🟢 Low</option>
+                  <option value="medium" selected>🟡 Medium</option>
+                  <option value="high">🔴 High</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Category Tag</label>
+                <input type="text" id="task-category" list="category-suggestions" placeholder="Work, Personal..." class="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-xs font-medium shadow-sm placeholder-slate-400" />
+                <datalist id="category-suggestions">
+                  <option value="Work"></option>
+                  <option value="Personal"></option>
+                  <option value="Urgent"></option>
+                  <option value="Health"></option>
+                </datalist>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Due Date</label>
+                <input type="date" id="task-date" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-xs font-medium shadow-sm cursor-pointer" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 dark:text-slate-800 uppercase tracking-wider mb-1">Alarm Time</label>
+                <input type="time" id="task-time" class="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:outline-none text-xs font-medium shadow-sm cursor-pointer" />
+              </div>
+            </div>
+
+            <button type="submit" id="submit-btn" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-brand-600 to-tealAccent-600 hover:from-brand-500 hover:to-tealAccent-500 text-white font-semibold text-xs uppercase tracking-wider shadow-lg shadow-brand-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 mt-4 cursor-pointer">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span id="submit-btn-text">Save Task</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- VIEW 3: ALARMS & NOTIFICATIONS TAB -->
+      <section id="tab-alarms" class="tab-view space-y-6 hidden max-w-3xl mx-auto">
+        <div class="glass p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-amber-500/10 text-amber-500 flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white">System Notification Status</h3>
+              <p id="notif-status-desc" class="text-xs text-slate-500 dark:text-slate-400">Click to enable background native OS alerts.</p>
+            </div>
+          </div>
+          <button id="notif-perm-btn" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md transition-all cursor-pointer">
+            Enable Alerts
+          </button>
+        </div>
+
+        <div class="glass p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 space-y-4">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <svg class="w-4 h-4 text-tealAccent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+            </svg>
+            Web Audio Alarm Sound Engine & Instant Test
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Test the alarm sound or force an instant on-screen alarm popup right now to verify how it looks and works.
+          </p>
+          <div class="flex flex-wrap items-center gap-3 pt-2">
+            <button id="test-audio-btn" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-900 dark:text-white text-xs font-semibold transition-all cursor-pointer">
+              🔔 Test Alarm Tone
+            </button>
+            <button id="test-popup-btn" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md transition-all cursor-pointer">
+              🚨 Test Screen Popup Now
+            </button>
+          </div>
+        </div>
+
+        <div class="glass p-5 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 space-y-3">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Scheduled Task Alarms</h3>
+          <div id="scheduled-alarms-list" class="space-y-2"></div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: ANALYTICS TAB -->
+      <section id="tab-analytics" class="tab-view space-y-6 hidden max-w-3xl mx-auto">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="glass p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 text-center">
+            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Tasks</span>
+            <p id="stat-total" class="text-2xl font-extrabold text-slate-900 dark:text-white mt-1">0</p>
+          </div>
+          <div class="glass p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 text-center">
+            <span class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Active</span>
+            <p id="stat-pending" class="text-2xl font-extrabold text-amber-600 dark:text-amber-400 mt-1">0</p>
+          </div>
+          <div class="glass p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 text-center">
+            <span class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Completed</span>
+            <p id="stat-completed" class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">0</p>
+          </div>
+          <div class="glass p-4 rounded-2xl border border-slate-200/80 dark:border-slate-800/80 text-center">
+            <span class="text-[10px] font-bold text-rose-500 uppercase tracking-wider">High Priority</span>
+            <p id="stat-high" class="text-2xl font-extrabold text-rose-600 dark:text-rose-400 mt-1">0</p>
+          </div>
+        </div>
+
+        <div class="glass p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 space-y-3">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white">Overall Completion Progress</h3>
+            <span id="progress-percent" class="text-xs font-bold text-brand-600 dark:text-brand-400">0%</span>
+          </div>
+          <div class="w-full h-3 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+            <div id="progress-bar-fill" class="h-full bg-gradient-to-r from-brand-600 to-tealAccent-500 transition-all duration-500 w-0"></div>
+          </div>
+        </div>
+
+        <div class="glass p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 space-y-4">
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Priority Distribution</h3>
+          <div class="space-y-3">
+            <div>
+              <div class="flex justify-between text-xs font-medium mb-1">
+                <span class="text-rose-500 font-semibold">🔴 High Priority</span>
+                <span id="breakdown-high-text">0 tasks</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                <div id="breakdown-high-bar" class="h-full bg-rose-500 transition-all duration-500 w-0"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs font-medium mb-1">
+                <span class="text-amber-500 font-semibold">🟡 Medium Priority</span>
+                <span id="breakdown-medium-text">0 tasks</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                <div id="breakdown-medium-bar" class="h-full bg-amber-500 transition-all duration-500 w-0"></div>
+              </div>
+            </div>
+            <div>
+              <div class="flex justify-between text-xs font-medium mb-1">
+                <span class="text-emerald-500 font-semibold">🟢 Low Priority</span>
+                <span id="breakdown-low-text">0 tasks</span>
+              </div>
+              <div class="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+                <div id="breakdown-low-bar" class="h-full bg-emerald-500 transition-all duration-500 w-0"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 5: SETTINGS TAB -->
+      <section id="tab-settings" class="tab-view space-y-4 hidden max-w-3xl mx-auto">
+        <div class="glass p-6 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900 dark:text-white">App Theme</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400">Toggle between Dark Mode and Light Mode</p>
+            </div>
+            <button id="settings-theme-btn" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-semibold cursor-pointer">
+              Toggle Dark Theme
+            </button>
+          </div>
+
+          <hr class="border-slate-200 dark:border-slate-800" />
+
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">Backup & Restore</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Save tasks to a JSON file or restore from a backup.</p>
+            <div class="flex items-center gap-3">
+              <button id="export-btn" class="px-4 py-2 rounded-xl bg-tealAccent-600 text-white text-xs font-semibold shadow-md hover:bg-tealAccent-500 transition-all flex items-center gap-1.5 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Export JSON
+              </button>
+              <button id="import-btn" class="px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold shadow-md hover:bg-indigo-500 transition-all flex items-center gap-1.5 cursor-pointer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                Restore JSON
+              </button>
+              <input type="file" id="import-file" accept=".json" class="hidden" />
+            </div>
+          </div>
+
+          <hr class="border-slate-200 dark:border-slate-800" />
+
+          <div>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">Offline Service Worker Status</h3>
+            <p id="sw-info-text" class="text-xs font-mono text-emerald-500 bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20">
+              Service Worker: Active & Caching App Shell for Offline Use.
+            </p>
+          </div>
+
+          <hr class="border-slate-200 dark:border-slate-800" />
+
+          <div>
+            <h3 class="text-sm font-bold text-rose-500 mb-1">Danger Zone</h3>
+            <button id="clear-all-data-btn" class="px-4 py-2 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 text-xs font-semibold border border-rose-500/20 transition-all cursor-pointer">
+              Clear All IndexedDB Data
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Center-Screen Alarm Popup Modal -->
+    <div id="alarm-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-sm w-full border border-slate-200 dark:border-slate-800 shadow-2xl text-center transform scale-100 transition-transform">
+        <div class="w-16 h-16 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mx-auto mb-4 animate-bounce">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white">⏰ Reminder Alert!</h3>
+        <p id="alarm-task-title" class="text-sm font-semibold text-brand-600 dark:text-brand-400 mt-2">Task Title</p>
+        <p id="alarm-task-desc" class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-h-24 overflow-y-auto">Task Details...</p>
+        <div class="mt-6 flex flex-col gap-2">
+          <button id="dismiss-alarm-btn" class="w-full py-3 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-semibold text-xs uppercase tracking-wider shadow-lg shadow-rose-500/30 transition-all cursor-pointer">
+            Turn Off Reminder
+          </button>
+          <button id="complete-alarm-btn" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs uppercase tracking-wider shadow-md transition-all cursor-pointer">
+            Mark as Done & Turn Off
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Toast Notification -->
+    <div id="toast" class="fixed bottom-20 sm:bottom-6 right-5 px-4 py-3 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none z-50 flex items-center gap-2">
+      <span id="toast-msg">Notification</span>
+    </div>
+
+  </div>
+
+  <script>
+    // --- 1. PWA MANIFEST INJECTION ---
+    const manifestJSON = {
+      "name": "Doodle Smart Task Manager PWA",
+      "short_name": "DoodleTask",
+      "start_url": "./",
+      "display": "standalone",
+      "background_color": "#020617",
+      "theme_color": "#4f46e5",
+      "icons": [
+        {
+          "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%234f46e5'><rect width='512' height='512' rx='128' fill='%234f46e5'/><path d='M150 256l70 70 142-142' stroke='%23ffffff' stroke-width='40' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>",
+          "sizes": "512x512",
+          "type": "image/svg+xml"
+        }
+      ]
+    };
+    const manifestBlob = new Blob([JSON.stringify(manifestJSON)], { type: 'application/json' });
+    document.getElementById('manifest-placeholder').setAttribute('href', URL.createObjectURL(manifestBlob));
+
+    // --- 2. REGISTER STANDALONE sw.js FILE & LISTEN FOR MESSAGES ---
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => {
+          console.log('Standalone Service Worker Registered');
         })
-    );
-});
+        .catch(err => console.log('SW Reg Error:', err));
+
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.action === 'OPEN_MODAL_FROM_NOTI') {
+          triggerAlarm({
+            id: 'noti_triggered',
+            title: event.data.title || 'Task Reminder',
+            description: event.data.body || 'Due now',
+            priority: 'High',
+            completed: false
+          });
+        }
+      });
+    }
+
+    // --- 3. INDEXEDDB STORAGE ENGINE ---
+    class TaskDB {
+      constructor() {
+        this.dbName = 'DoodleTaskDB_PWA_Tabbed';
+        this.version = 1;
+        this.db = null;
+      }
+
+      async init() {
+        return new Promise((resolve, reject) => {
+          const request = indexedDB.open(this.dbName, this.version);
+          request.onupgradeneeded = (e) => {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains('tasks')) {
+              db.createObjectStore('tasks', { keyPath: 'id' });
+            }
+          };
+          request.onsuccess = (e) => {
+            this.db = e.target.result;
+            resolve();
+          };
+          request.onerror = (e) => reject('DB Error: ' + e.target.error);
+        });
+      }
+
+      async getAllTasks() {
+        return new Promise((resolve) => {
+          if (!this.db) return resolve([]);
+          const tx = this.db.transaction('tasks', 'readonly');
+          const store = tx.objectStore('tasks');
+          const req = store.getAll();
+          req.onsuccess = () => resolve(req.result || []);
+          req.onerror = () => resolve([]);
+        });
+      }
+
+      async saveTask(task) {
+        return new Promise((resolve, reject) => {
+          const tx = this.db.transaction('tasks', 'readwrite');
+          const store = tx.objectStore('tasks');
+          const req = store.put(task);
+          req.onsuccess = () => resolve(task);
+          req.onerror = (e) => reject(e.target.error);
+        });
+      }
+
+      async deleteTask(id) {
+        return new Promise((resolve, reject) => {
+          const tx = this.db.transaction('tasks', 'readwrite');
+          const store = tx.objectStore('tasks');
+          const req = store.delete(id);
+          req.onsuccess = () => resolve();
+          req.onerror = (e) => reject(e.target.error);
+        });
+      }
+
+      async clearAll() {
+        return new Promise((resolve) => {
+          const tx = this.db.transaction('tasks', 'readwrite');
+          const store = tx.objectStore('tasks');
+          store.clear().onsuccess = () => resolve();
+        });
+      }
+    }
+
+    // --- 4. WEB AUDIO SYNTHESIZER ALARM ---
+    class AlarmSynthesizer {
+      constructor() {
+        this.audioCtx = null;
+        this.intervalId = null;
+      }
+
+      init() {
+        if (!this.audioCtx) {
+          this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (this.audioCtx.state === 'suspended') {
+          this.audioCtx.resume();
+        }
+      }
+
+      playTone() {
+        try {
+          this.init();
+          const osc = this.audioCtx.createOscillator();
+          const gain = this.audioCtx.createGain();
+
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(880, this.audioCtx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(440, this.audioCtx.currentTime + 0.3);
+
+          gain.gain.setValueAtTime(0.4, this.audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.audioCtx.currentTime + 0.3);
+
+          osc.connect(gain);
+          gain.connect(this.audioCtx.destination);
+
+          osc.start();
+          osc.stop(this.audioCtx.currentTime + 0.3);
+        } catch (e) {
+          console.warn('Web Audio error:', e);
+        }
+      }
+
+      startAlarm() {
+        this.stopAlarm();
+        this.playTone();
+        this.intervalId = setInterval(() => this.playTone(), 700);
+
+        if ('vibrate' in navigator) {
+          navigator.vibrate([300, 200, 300, 200, 300]);
+        }
+      }
+
+      stopAlarm() {
+        if (this.intervalId) {
+          clearInterval(this.intervalId);
+          this.intervalId = null;
+        }
+      }
+    }
+
+    // --- 5. APP STATE & GLOBAL VARS ---
+    const db = new TaskDB();
+    const synthesizer = new AlarmSynthesizer();
+    let tasks = [];
+    let currentActiveAlarmTask = null;
+    let currentFilter = 'all';
+    let currentPriorityFilter = 'all';
+    let currentCategoryFilter = 'all';
+    let searchQuery = '';
+
+    // DOM References
+    const taskForm = document.getElementById('task-form');
+    const taskIdInput = document.getElementById('task-id');
+    const titleInput = document.getElementById('task-title');
+    const descInput = document.getElementById('task-desc');
+    const priorityInput = document.getElementById('task-priority');
+    const categoryInput = document.getElementById('task-category');
+    const dateInput = document.getElementById('task-date');
+    const timeInput = document.getElementById('task-time');
+    const submitBtnText = document.getElementById('submit-btn-text');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    const formTitle = document.getElementById('form-title');
+
+    const taskList = document.getElementById('task-list');
+    const emptyState = document.getElementById('empty-state');
+    const searchInput = document.getElementById('search-input');
+    const priorityFilterSelect = document.getElementById('priority-filter');
+    const categoryFilterSelect = document.getElementById('category-filter');
+    const clearCompletedBtn = document.getElementById('clear-completed-btn');
+
+    const statTotal = document.getElementById('stat-total');
+    const statPending = document.getElementById('stat-pending');
+    const statCompleted = document.getElementById('stat-completed');
+    const statHigh = document.getElementById('stat-high');
+
+    const progressPercent = document.getElementById('progress-percent');
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    const breakdownHighBar = document.getElementById('breakdown-high-bar');
+    const breakdownMediumBar = document.getElementById('breakdown-medium-bar');
+    const breakdownLowBar = document.getElementById('breakdown-low-bar');
+
+    const connectionBadge = document.getElementById('connection-badge');
+    const connectionText = document.getElementById('connection-text');
+    const settingsThemeBtn = document.getElementById('settings-theme-btn');
+    const exportBtn = document.getElementById('export-btn');
+    const importBtn = document.getElementById('import-btn');
+    const importFile = document.getElementById('import-file');
+
+    const notifPermBtn = document.getElementById('notif-perm-btn');
+    const notifStatusDesc = document.getElementById('notif-status-desc');
+    const testAudioBtn = document.getElementById('test-audio-btn');
+    const testPopupBtn = document.getElementById('test-popup-btn');
+    const scheduledAlarmsList = document.getElementById('scheduled-alarms-list');
+
+    const alarmModal = document.getElementById('alarm-modal');
+    const alarmTaskTitle = document.getElementById('alarm-task-title');
+    const alarmTaskDesc = document.getElementById('alarm-task-desc');
+    const dismissAlarmBtn = document.getElementById('dismiss-alarm-btn');
+    const completeAlarmBtn = document.getElementById('complete-alarm-btn');
+    const clearAllDataBtn = document.getElementById('clear-all-data-btn');
+
+    // --- 6. TAB NAVIGATION SYSTEM ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-view').forEach(view => view.classList.add('hidden'));
+      document.querySelectorAll('.nav-tab').forEach(btn => {
+        btn.className = 'nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer';
+      });
+
+      const targetView = document.getElementById(tabId);
+      if (targetView) targetView.classList.remove('hidden');
+
+      const activeBtn = document.querySelector(`[data-tab="${tabId}"]`);
+      if (activeBtn) {
+        activeBtn.className = 'nav-tab flex-1 sm:flex-none flex flex-col sm:flex-row items-center justify-center gap-1 py-2.5 sm:px-4 sm:py-2 rounded-xl text-xs font-bold transition-all text-brand-600 dark:text-brand-400 bg-brand-500/10 cursor-pointer';
+      }
+    }
+
+    document.querySelectorAll('.nav-tab').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    // --- 7. APP INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', async () => {
+      await db.init();
+      tasks = await db.getAllTasks();
+
+      initTheme();
+      updateOnlineStatus();
+      updateNotificationUI();
+      window.addEventListener('online', updateOnlineStatus);
+      window.addEventListener('offline', updateOnlineStatus);
+
+      render();
+      setInterval(checkAlarms, 2000);
+    });
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem('doodle_theme') || 'system';
+      const isDark = savedTheme === 'dark' || (savedTheme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.classList.toggle('dark', isDark);
+    }
+
+    settingsThemeBtn.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('doodle_theme', isDark ? 'dark' : 'light');
+      showToast(isDark ? 'Dark Theme Activated' : 'Light Theme Activated');
+    });
+
+    function updateOnlineStatus() {
+      if (navigator.onLine) {
+        connectionBadge.className = 'px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20';
+        connectionText.textContent = '🟢 Online';
+      } else {
+        connectionBadge.className = 'px-3 py-1 rounded-xl text-xs font-semibold flex items-center gap-1.5 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20';
+        connectionText.textContent = '⚡ Offline';
+      }
+    }
+
+    // --- 8. DUAL NOTIFICATION & POPUP ENGINE ---
+    function updateNotificationUI() {
+      if ('Notification' in window) {
+        if (Notification.permission === 'granted') {
+          notifStatusDesc.textContent = '✅ Native notifications enabled!';
+          notifPermBtn.textContent = 'Active';
+          notifPermBtn.disabled = true;
+          notifPermBtn.className = 'px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold cursor-default opacity-80';
+        } else if (Notification.permission === 'denied') {
+          notifStatusDesc.textContent = '❌ Permission blocked in browser settings.';
+          notifPermBtn.textContent = 'Blocked';
+          notifPermBtn.disabled = true;
+          notifPermBtn.className = 'px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold cursor-default opacity-80';
+        }
+      }
+    }
+
+    notifPermBtn.addEventListener('click', async () => {
+      if ('Notification' in window) {
+        const perm = await Notification.requestPermission();
+        updateNotificationUI();
+        if (perm === 'granted') showToast('System Notifications Enabled!');
+      }
+    });
+
+    testAudioBtn.addEventListener('click', () => {
+      synthesizer.playTone();
+      showToast('Playing Web Audio Synthesizer Chime');
+    });
+
+    testPopupBtn.addEventListener('click', () => {
+      triggerAlarm({
+        id: 'test_popup',
+        title: '🚨 Test Task Reminder',
+        description: 'This is a test popup to verify turning off and managing alarms.',
+        priority: 'High',
+        completed: false
+      });
+    });
+
+    function checkAlarms() {
+      const now = new Date();
+      const currentDate = now.toISOString().split('T')[0];
+      const currentHours = String(now.getHours()).padStart(2, '0');
+      const currentMins = String(now.getMinutes()).padStart(2, '0');
+      const currentTime = `${currentHours}:${currentMins}`;
+
+      tasks.forEach((task) => {
+        if (!task.completed && !task.alarmFired && task.dueDate && task.dueTime) {
+          if (task.dueDate === currentDate && task.dueTime <= currentTime) {
+            triggerAlarm(task);
+          }
+        }
+      });
+    }
+
+    function triggerAlarm(task) {
+      task.alarmFired = true;
+      if (task.id !== 'test_popup' && task.id !== 'noti_triggered') {
+        db.saveTask(task);
+      }
+      currentActiveAlarmTask = task;
+
+      // 1. Play Web Audio Chime Loops
+      synthesizer.startAlarm();
+
+      // 2. Send message to standalone sw.js to dispatch Notification Bar alert if active
+      if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+          action: 'TRIGGER_ALARM',
+          priority: task.priority ? task.priority.charAt(0).toUpperCase() + task.priority.slice(1) : 'Medium',
+          title: task.title,
+          body: task.description || 'Your scheduled task reminder is due!'
+        });
+      }
+
+      // 3. Force Center-Screen Modal Popup Visible
+      alarmTaskTitle.textContent = task.title;
+      alarmTaskDesc.textContent = task.description || 'No additional notes provided.';
+      alarmModal.classList.remove('hidden');
+
+      render();
+    }
+
+    dismissAlarmBtn.addEventListener('click', () => {
+      synthesizer.stopAlarm();
+      alarmModal.classList.add('hidden');
+      currentActiveAlarmTask = null;
+      showToast('Reminder Turned Off');
+    });
+
+    completeAlarmBtn.addEventListener('click', async () => {
+      synthesizer.stopAlarm();
+      if (currentActiveAlarmTask && currentActiveAlarmTask.id !== 'test_popup' && currentActiveAlarmTask.id !== 'noti_triggered') {
+        currentActiveAlarmTask.completed = true;
+        await db.saveTask(currentActiveAlarmTask);
+      }
+      alarmModal.classList.add('hidden');
+      currentActiveAlarmTask = null;
+      showToast('Task Completed & Reminder Turned Off');
+      render();
+    });
+
+    // --- 9. CRUD & BACKGROUND SCHEDULING LOGIC ---
+    taskForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const id = taskIdInput.value || 'task_' + Date.now();
+      const existingTask = tasks.find(t => t.id === id);
+
+      const newTask = {
+        id,
+        title: titleInput.value.trim(),
+        description: descInput.value.trim(),
+        priority: priorityInput.value,
+        category: categoryInput.value.trim() || 'General',
+        dueDate: dateInput.value || '',
+        dueTime: timeInput.value || '',
+        completed: existingTask ? existingTask.completed : false,
+        alarmFired: existingTask ? existingTask.alarmFired : false,
+        createdAt: existingTask ? existingTask.createdAt : Date.now()
+      };
+
+      await db.saveTask(newTask);
+
+      // Schedule TimestampTrigger with Service Worker for background alarm wake-ups
+      if (newTask.dueDate && newTask.dueTime && navigator.serviceWorker && navigator.serviceWorker.controller) {
+        const targetTimestamp = new Date(`${newTask.dueDate}T${newTask.dueTime}`).getTime();
+        if (targetTimestamp > Date.now()) {
+          navigator.serviceWorker.controller.postMessage({
+            action: 'SCHEDULE_ALARM',
+            id: newTask.id,
+            title: `⏰ ${newTask.title}`,
+            body: newTask.description || 'Task reminder is due!',
+            timestamp: targetTimestamp
+          });
+        }
+      }
+
+      if (taskIdInput.value) {
+        const index = tasks.findIndex(t => t.id === id);
+        tasks[index] = newTask;
+        showToast('Task Updated & Background Alarm Scheduled');
+      } else {
+        tasks.unshift(newTask);
+        showToast('New Task Saved & Background Alarm Scheduled');
+      }
+
+      resetForm();
+      render();
+      switchTab('tab-tasks');
+    });
+
+    function resetForm() {
+      taskIdInput.value = '';
+      titleInput.value = '';
+      descInput.value = '';
+      priorityInput.value = 'medium';
+      categoryInput.value = '';
+      dateInput.value = '';
+      timeInput.value = '';
+      submitBtnText.textContent = 'Save Task';
+      cancelEditBtn.classList.add('hidden');
+      formTitle.innerHTML = `
+        <svg class="w-5 h-5 text-brand-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Create New Task
+      `;
+    }
+
+    cancelEditBtn.addEventListener('click', () => {
+      resetForm();
+      switchTab('tab-tasks');
+    });
+
+    async function toggleComplete(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        task.completed = !task.completed;
+        await db.saveTask(task);
+        showToast(task.completed ? 'Task Finished' : 'Task Reopened');
+        render();
+      }
+    }
+
+    async function deleteTask(id) {
+      await db.deleteTask(id);
+      tasks = tasks.filter(t => t.id !== id);
+      showToast('Task Deleted');
+      render();
+    }
+
+    clearCompletedBtn.addEventListener('click', async () => {
+      const completed = tasks.filter(t => t.completed);
+      for (const t of completed) {
+        await db.deleteTask(t.id);
+      }
+      tasks = tasks.filter(t => !t.completed);
+      showToast('Cleared Completed Tasks');
+      render();
+    });
+
+    clearAllDataBtn.addEventListener('click', async () => {
+      if (confirm('Are you sure you want to clear all data? This cannot be undone.')) {
+        await db.clearAll();
+        tasks = [];
+        render();
+        showToast('All Tasks Erased');
+      }
+    });
+
+    // Backup & Restore
+    exportBtn.addEventListener('click', () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(tasks, null, 2));
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", `DoodleTasks_Backup_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(dlAnchor);
+      dlAnchor.click();
+      dlAnchor.remove();
+      showToast('Exported Tasks Backup JSON');
+    });
+
+    importBtn.addEventListener('click', () => importFile.click());
+
+    importFile.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const imported = JSON.parse(event.target.result);
+          if (Array.isArray(imported)) {
+            for (const t of imported) {
+              if (t.id && t.title) await db.saveTask(t);
+            }
+            tasks = await db.getAllTasks();
+            render();
+            showToast('Tasks Restored Successfully');
+          }
+        } catch (err) {
+          showToast('Invalid Backup File Format');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Filters & Searches
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase();
+      render();
+    });
+
+    priorityFilterSelect.addEventListener('change', (e) => {
+      currentPriorityFilter = e.target.value;
+      render();
+    });
+
+    categoryFilterSelect.addEventListener('change', (e) => {
+      currentCategoryFilter = e.target.value;
+      render();
+    });
+
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.filter-tab').forEach(t => {
+          t.className = 'filter-tab px-3 py-1 rounded-lg text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer';
+        });
+        tab.className = 'filter-tab px-3 py-1 rounded-lg text-xs font-semibold transition-all bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm cursor-pointer';
+        currentFilter = tab.dataset.filter;
+        render();
+      });
+    });
+
+    function updateCategoryDropdown() {
+      const categories = Array.from(new Set(tasks.map(t => t.category).filter(Boolean)));
+      categoryFilterSelect.innerHTML = '<option value="all">All Tags</option>';
+      categories.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat;
+        opt.textContent = cat;
+        if (cat === currentCategoryFilter) opt.selected = true;
+        categoryFilterSelect.appendChild(opt);
+      });
+    }
+
+    // --- 10. RENDER ENGINE ---
+    function render() {
+      updateCategoryDropdown();
+
+      let filtered = tasks.filter(t => {
+        if (currentFilter === 'pending' && t.completed) return false;
+        if (currentFilter === 'completed' && !t.completed) return false;
+        if (currentPriorityFilter !== 'all' && t.priority !== currentPriorityFilter) return false;
+        if (currentCategoryFilter !== 'all' && t.category !== currentCategoryFilter) return false;
+
+        if (searchQuery) {
+          const titleMatch = t.title.toLowerCase().includes(searchQuery);
+          const descMatch = (t.description || '').toLowerCase().includes(searchQuery);
+          const catMatch = (t.category || '').toLowerCase().includes(searchQuery);
+          return titleMatch || descMatch || catMatch;
+        }
+
+        return true;
+      });
+
+      // Update Dashboard Counters
+      const totalCount = tasks.length;
+      const completedCount = tasks.filter(t => t.completed).length;
+      const pendingCount = totalCount - completedCount;
+      const highCount = tasks.filter(t => t.priority === 'high' && !t.completed).length;
+      const mediumCount = tasks.filter(t => t.priority === 'medium' && !t.completed).length;
+      const lowCount = tasks.filter(t => t.priority === 'low' && !t.completed).length;
+
+      document.getElementById('tab-badge-tasks').textContent = pendingCount;
+      statTotal.textContent = totalCount;
+      statPending.textContent = pendingCount;
+      statCompleted.textContent = completedCount;
+      statHigh.textContent = highCount;
+
+      // Update Progress Bar
+      const percent = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+      progressPercent.textContent = `${percent}%`;
+      progressBarFill.style.width = `${percent}%`;
+
+      // Update Priority Breakdown
+      const highPct = totalCount > 0 ? (highCount / totalCount) * 100 : 0;
+      const medPct = totalCount > 0 ? (mediumCount / totalCount) * 100 : 0;
+      const lowPct = totalCount > 0 ? (lowCount / totalCount) * 100 : 0;
+
+      document.getElementById('breakdown-high-text').textContent = `${highCount} tasks`;
+      document.getElementById('breakdown-medium-text').textContent = `${mediumCount} tasks`;
+      document.getElementById('breakdown-low-text').textContent = `${lowCount} tasks`;
+      breakdownHighBar.style.width = `${highPct}%`;
+      breakdownMediumBar.style.width = `${medPct}%`;
+      breakdownLowBar.style.width = `${lowPct}%`;
+
+      // Render Scheduled Alarms Tab List
+      const timedTasks = tasks.filter(t => t.dueDate && t.dueTime && !t.completed);
+      const tabBadgeAlarms = document.getElementById('tab-badge-alarms');
+      if (timedTasks.length > 0) {
+        tabBadgeAlarms.textContent = timedTasks.length;
+        tabBadgeAlarms.classList.remove('hidden');
+      } else {
+        tabBadgeAlarms.classList.add('hidden');
+      }
+
+      scheduledAlarmsList.innerHTML = '';
+      if (timedTasks.length === 0) {
+        scheduledAlarmsList.innerHTML = '<p class="text-xs text-slate-400 italic">No upcoming alarms scheduled.</p>';
+      } else {
+        timedTasks.forEach(t => {
+          const item = document.createElement('div');
+          item.className = 'flex items-center justify-between p-3 rounded-xl bg-slate-100 dark:bg-slate-800/60 text-xs';
+          item.innerHTML = `
+            <div>
+              <p class="font-bold text-slate-900 dark:text-white">${escapeHtml(t.title)}</p>
+              <p class="text-[10px] text-slate-500">📅 ${t.dueDate} at ${t.dueTime}</p>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${t.alarmFired ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}">
+              ${t.alarmFired ? 'Triggered' : 'Active'}
+            </span>
+          `;
+          scheduledAlarmsList.appendChild(item);
+        });
+      }
+
+      // Render Task List UI Cards
+      taskList.innerHTML = '';
+      if (filtered.length === 0) {
+        emptyState.classList.remove('hidden');
+        emptyState.classList.add('flex');
+      } else {
+        emptyState.classList.add('hidden');
+        emptyState.classList.remove('flex');
+
+        filtered.forEach(task => {
+          const card = document.createElement('div');
+          
+          let priorityBadge = 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
+          if (task.priority === 'high') priorityBadge = 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20';
+          if (task.priority === 'medium') priorityBadge = 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+
+          card.className = `glass p-4 rounded-2xl border transition-all duration-200 hover:shadow-md flex items-start gap-3.5 ${
+            task.completed ? 'opacity-60 border-slate-200/60 dark:border-slate-800/60' : 'border-slate-200/80 dark:border-slate-800'
+          }`;
+
+          card.innerHTML = `
+            <button onclick="toggleComplete('${task.id}')" class="mt-0.5 w-5 h-5 rounded-lg border flex items-center justify-center transition-all cursor-pointer ${
+              task.completed 
+                ? 'bg-brand-600 border-brand-600 text-white' 
+                : 'border-slate-300 dark:border-slate-700 hover:border-brand-500'
+            }">
+              ${task.completed ? '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}
+            </button>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap mb-1">
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider border ${priorityBadge}">
+                  ${task.priority}
+                </span>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                  🏷️ ${escapeHtml(task.category)}
+                </span>
+                ${task.dueDate ? `
+                  <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1 ml-auto font-medium">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    ${task.dueDate} ${task.dueTime ? 'at ' + task.dueTime : ''}
+                  </span>
+                ` : ''}
+              </div>
+
+              <h3 class="text-sm font-semibold text-slate-900 dark:text-white break-words ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : ''}">
+                ${escapeHtml(task.title)}
+              </h3>
+              
+              ${task.description ? `<p class="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 break-words ${task.completed ? 'line-through text-slate-400 dark:text-slate-500' : ''}">${escapeHtml(task.description)}</p>` : ''}
+            </div>
+
+            <div class="flex items-center space-x-1">
+              <button onclick="deleteTask('${task.id}')" class="p-1.5 text-slate-400 hover:text-rose-500 transition-colors cursor-pointer" title="Delete">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          `;
+          taskList.appendChild(card);
+        });
+      }
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '&#8203;';
+      return str.replace(/[&<>"']/g, function(m) {
+        return {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#039;'
+        }[m];
+      });
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.textContent = msg;
+      toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
