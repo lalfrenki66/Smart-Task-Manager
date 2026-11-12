@@ -1,4 +1,4 @@
-// sw.js - Service Worker with Fixed Low Priority Vibration & Center Popups
+// sw.js - Service Worker with Priority Vibration, Action Buttons, and Notification Support
 self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
@@ -23,7 +23,6 @@ self.addEventListener('message', (event) => {
             vibratePattern = [300, 100, 300];
             requireInteractionSetting = true;
         } else if (priority === 'Low') {
-            // Distinct multi-pulse vibration pattern for Low priority so it triggers reliably on mobile
             vibratePattern = [100, 50, 100]; 
             requireInteractionSetting = false;
         }
