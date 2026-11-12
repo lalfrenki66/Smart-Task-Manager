@@ -1,4 +1,4 @@
-// sw.js - Standalone Service Worker with Background Alarm Scheduling & Lock-Screen Support
+// sw.js - Upgraded for Advanced Priorities & Ringtones
 self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
@@ -10,21 +10,23 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('message', (event) => {
     if (!event.data) return;
 
-    // Immediate Trigger (When app is open)
     if (event.data.action === 'TRIGGER_ALARM') {
         showSystemAlarm(event.data.title, event.data.body, event.data.priority);
     }
 
-    // Background Scheduled Trigger (When leaving app / phone sleeps)
     if (event.data.action === 'SCHEDULE_ALARM' && event.data.timestamp) {
         scheduleBackgroundAlarm(event.data);
     }
 });
 
-function showSystemAlarm(title, body, priority = 'High') {
-    let vibratePattern = [500, 200, 500, 200, 500];
-    if (priority === 'Medium') vibratePattern = [300, 100, 300];
-    if (priority === 'Low') vibratePattern = [100, 50, 100];
+function showSystemAlarm(title, body, priority = 'Medium') {
+    // Priority-based vibration patterns
+    let vibratePattern = [300, 100, 300];
+    if (priority === 'High' || priority === 'Urgent') {
+        vibratePattern = [500, 200, 500, 200, 500, 200, 500];
+    } else if (priority === 'Low') {
+        vibratePattern = [100, 50, 100];
+    }
 
     const options = {
         body: body || "Your task is due now!",
@@ -41,13 +43,12 @@ function showSystemAlarm(title, body, priority = 'High') {
         ]
     };
 
-    return self.registration.showNotification(title || "⚠️ ALARM DUE!", options);
+    return self.registration.showNotification(`[${priority}] ${title || "⚠️ ALARM DUE!"}`, options);
 }
 
 function scheduleBackgroundAlarm(data) {
-    // Uses Notification Triggers API (TimestampTrigger) when supported by mobile browser
     if ('showTrigger' in Notification.prototype && data.timestamp > Date.now()) {
-        self.registration.showNotification(data.title || "⚠️ ALARM DUE!", {
+        self.registration.showNotification(`[${data.priority || 'Medium'}] ${data.title || "⚠️ ALARM DUE!"}`, {
             body: data.body || "Scheduled reminder",
             tag: 'scheduled-' + data.id,
             showTrigger: new TimestampTrigger(data.timestamp),
@@ -66,7 +67,6 @@ self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     if (event.action === 'dismiss') return;
 
-    // Focuses app window and commands index.html to force-open center modal popup
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
             if (clientList.length > 0) {
